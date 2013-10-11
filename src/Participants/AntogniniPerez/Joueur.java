@@ -7,13 +7,13 @@ import java.util.Scanner;
 
 public class Joueur extends Othello.Joueur {
 
+	private Board board;
 	// depth: profondeur alpha-beta
 	// playerID: 0 = rouge, 1 = bleu
 	public Joueur(int depth, int playerID) {
 		super();
+		board = new Board(playerID == 1 ? Piece.Blue : Piece.Red);
 	}
-
-	Scanner stdin = new Scanner(System.in);
 
 	public Move nextPlay(Move move) {
 		Move result = null;
