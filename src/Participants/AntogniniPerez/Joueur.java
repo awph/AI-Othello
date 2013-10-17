@@ -2,20 +2,19 @@ package Participants.AntogniniPerez;
 
 import Othello.Move;
 
-// Utile seulement dans cet exemple, pour lire l'entrée de l'utilisateur à la console
-import java.util.Scanner;
-
 public class Joueur extends Othello.Joueur {
 
 	private Board board;
-	// depth: profondeur alpha-beta
-	// playerID: 0 = rouge, 1 = bleu
-	public Joueur(int depth, int playerID) {
+
+	// playerID: 0 = red, 1 = blue
+	public Joueur(int depth, int playerID) 
+	{
 		super();
 		board = new Board(playerID == 1 ? Piece.Blue : Piece.Red);
 	}
 
-	public Move nextPlay(Move move) {
+	public Move nextPlay(Move move) 
+	{
 		Move result = null;
 		if (move != null)
 			System.out.println("Coup adverse: " + move.i + ", " + move.j);
