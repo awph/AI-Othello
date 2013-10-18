@@ -1,5 +1,6 @@
 package Participants.AntogniniPerez;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 import Othello.Move;
@@ -13,7 +14,7 @@ public class Joueur extends Othello.Joueur {
 	// playerID: 0 = red, 1 = blue
 	public Joueur(int depth, int playerID) 
 	{
-		super();
+		super(depth, playerID);
 		player = playerID == 1 ? Piece.Blue : Piece.Red;
 		allPossibleMove = new int[121];
 		board = new Board(player);
@@ -34,6 +35,8 @@ public class Joueur extends Othello.Joueur {
 		{
 			System.out.println("Coup adverse: " + move.i + ", " + move.j);
 			board.addPiece(move.i, move.j, player == Piece.Red ? Piece.Blue : Piece.Red);
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PLAYER");
+			board.debug__Board();
 		}
 		
 		result = (Move) Compute.alphabeta(board, depth, 1, Compute._INF)[1];

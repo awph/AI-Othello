@@ -1,5 +1,7 @@
 package Participants.AntogniniPerez;
 
+import java.util.Arrays;
+
 import Othello.Move;
 
 public class Compute {
@@ -22,6 +24,9 @@ public class Compute {
 		int[] moves = new int[121];
 		root.getAllPossibleMove(moves, root.getPlayer());
 		for (int i = 0; moves[i] > -1; i += 2) {
+			System.out.println(Arrays.toString(moves));
+			System.out.println("i : " + moves[i] + " j : " + moves[i + 1]);
+			root.debug__Board();
 			Board newNode = new Board(root);
 			newNode.addPiece(moves[i], moves[i + 1], currentPlayer);
 			Object[] result = alphabeta(newNode, depth - 1, -minOrMax, optimalValue);

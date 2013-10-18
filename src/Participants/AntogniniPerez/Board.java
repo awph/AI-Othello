@@ -33,11 +33,7 @@ public class Board {
 		if (player == currentPlayer && !isLegit(rowMove, colMove, currentPlayer))
 			return false;
 
-		System.out.println("\nBefore");
-		debug__Board();
-		System.out.println("\nAfter");
 		update(rowMove, colMove, currentPlayer);
-		debug__Board();
 
 		return true;
 	}
@@ -45,9 +41,9 @@ public class Board {
 	public boolean isFinished() {
 		for (int i = 0; i < BOARD_SIZE; ++i)
 			for (int j = 0; j < BOARD_SIZE; ++j)
-				if (board[j][i] == Piece.Empty && isLegit(i, j, Piece.Blue) && isLegit(i, j, Piece.Red))
-					return true;
-		return false;
+				if (board[j][i] == Piece.Empty && (isLegit(i, j, Piece.Blue) || isLegit(i, j, Piece.Red)))
+					return false;
+		return true;
 	}
 
 	/**
@@ -125,7 +121,7 @@ public class Board {
 		int indexOutputArray = 0;
 		for (int i = 0; i < BOARD_SIZE; ++i)
 			for (int j = 0; j < BOARD_SIZE; ++j)
-				if (isLegit(i, j, currentPlayer)) {
+				if (board[j][i] == Piece.Empty && isLegit(i, j, currentPlayer)) {
 					outputArray[indexOutputArray++] = i;
 					outputArray[indexOutputArray++] = j;
 				}
@@ -150,7 +146,7 @@ public class Board {
 			return mine;
 	}
 
-	private void debug__Board() {
+	public void debug__Board() {
 		for (int i = 0; i < BOARD_SIZE; ++i) {
 			for (int j = 0; j < BOARD_SIZE; ++j)
 				System.out.print(board[i][j] + "\t");
@@ -257,28 +253,39 @@ public class Board {
 				board[j][i] = currentPlayer;
 
 		if (checkDiagonallyBottomLeftToTopRight(rowMove, colMove, currentPlayer))
-			for (int i = rowMove + 1, j = colMove - 1; i < BOARD_SIZE && j > 0 && board[j][i] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); ++i, --j)
+			for (int i = rowMove - 1, j = colMove + 1; i > 0 && j < BOARD_SIZE && board[j][i] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); --i, ++j)
 				board[j][i] = currentPlayer;
 
 		if (checkDiagonallyTopRightToBottomLeft(rowMove, colMove, currentPlayer))
-			for (int i = rowMove - 1, j = colMove - 1; i > 0 && j > 0 && board[j][i] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); --i, --j)
+			for (int i = rowMove + 1, j = colMove - 1; i < BOARD_SIZE && j > 0 && board[j][i] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); ++i, --j)
 				board[j][i] = currentPlayer;
 
 		if (checkDiagonallyBottomRightToTopLeft(rowMove, colMove, currentPlayer))
-			for (int i = rowMove - 1, j = colMove + 1; i > 0 && j < BOARD_SIZE && board[j][i] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); --i, ++j)
+			for (int i = rowMove - 1, j = colMove - 1; i > 0 && j > 0 && board[j][i] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); --i, --j)
 				board[j][i] = currentPlayer;
 	}
 
 	private boolean isLegit(int rowMove, int colMove, Piece currentPlayer) {
+
+		 System.out.println( checkHorizontallyLeftToRight(rowMove, colMove, currentPlayer) );
+		 System.out.println( checkHorizontallyRightToLeft(rowMove, colMove, currentPlayer)  );
+		 System.out.println( checkVerticallyTopToBottom(rowMove, colMove, currentPlayer)  );
+		 System.out.println( checkVerticallyBottomToTop(rowMove, colMove, currentPlayer)  );
+		 System.out.println( checkDiagonallyTopLeftToBottomRight(rowMove, colMove, currentPlayer)  );
+		 System.out.println( checkDiagonallyBottomLeftToTopRight(rowMove, colMove, currentPlayer)  );
+		 System.out.println( checkDiagonallyTopRightToBottomLeft(rowMove, colMove, currentPlayer)  );
+		 System.out.println( checkDiagonallyBottomRightToTopLeft(rowMove, colMove, currentPlayer) );
+		 
 		return (checkHorizontallyLeftToRight(rowMove, colMove, currentPlayer) || checkHorizontallyRightToLeft(rowMove, colMove, currentPlayer) || checkVerticallyTopToBottom(rowMove, colMove, currentPlayer) || checkVerticallyBottomToTop(rowMove, colMove, currentPlayer) || checkDiagonallyTopLeftToBottomRight(rowMove, colMove, currentPlayer) || checkDiagonallyBottomLeftToTopRight(rowMove, colMove, currentPlayer) || checkDiagonallyTopRightToBottomLeft(rowMove, colMove, currentPlayer) || checkDiagonallyBottomRightToTopLeft(
 				rowMove, colMove, currentPlayer));
 	}
 
 	private boolean checkHorizontallyLeftToRight(int rowMove, int colMove, Piece currentPlayer) {
 		for (int i = rowMove + 2; i < BOARD_SIZE; ++i) {
+			System.out.println(board[colMove][i - 1] + " " + board[colMove][i] + " " + currentPlayer + " " + player);
 			if (board[colMove][i - 1] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[colMove][i] == currentPlayer)
 				return true;
-			else if (board[colMove][i] == Piece.Empty)
+			else if (board[colMove][i - 1] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[colMove][i] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
 				return false;
 		}
 		return false;
@@ -288,7 +295,7 @@ public class Board {
 		for (int i = rowMove - 2; i > 0; --i)
 			if (board[colMove][i + 1] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[colMove][i] == currentPlayer)
 				return true;
-			else if (board[colMove][i] == Piece.Empty)
+			else if (board[colMove][i + 1] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[colMove][i] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
 				return false;
 		return false;
 	}
@@ -297,17 +304,20 @@ public class Board {
 		for (int j = colMove + 2; j < BOARD_SIZE; ++j)
 			if (board[j - 1][rowMove] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[j][rowMove] == currentPlayer)
 				return true;
-			else if (board[j][rowMove] == Piece.Empty)
+			else if (board[j - 1][rowMove] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[j][rowMove] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
 				return false;
 		return false;
 	}
 
 	private boolean checkVerticallyBottomToTop(int rowMove, int colMove, Piece currentPlayer) {
 		for (int j = colMove - 2; j > 0; --j)
+		{
+			System.out.println(board[j + 1][rowMove] + " " + board[j][rowMove] + " " + currentPlayer + " " + player);
 			if (board[j + 1][rowMove] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[j][rowMove] == currentPlayer)
 				return true;
-			else if (board[j][rowMove] == Piece.Empty)
+			else if (board[j + 1][rowMove] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[j][rowMove] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
 				return false;
+		}
 		return false;
 	}
 
@@ -315,7 +325,7 @@ public class Board {
 		for (int i = rowMove + 2, j = colMove + 2; i < BOARD_SIZE && j < BOARD_SIZE; ++i, ++j)
 			if (board[j - 1][i - 1] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[j][i] == currentPlayer)
 				return true;
-			else if (board[j][i] == Piece.Empty)
+			else if (board[j - 1][i - 1] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[j][i] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
 				return false;
 		return false;
 	}
@@ -324,7 +334,7 @@ public class Board {
 		for (int i = rowMove + 2, j = colMove - 2; i < BOARD_SIZE && j > 0; ++i, --j)
 			if (board[j + 1][i - 1] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[j][i] == currentPlayer)
 				return true;
-			else if (board[j][i] == Piece.Empty)
+			else if (board[j + 1][i - 1] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[j][i] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
 				return false;
 		return false;
 	}
@@ -333,7 +343,7 @@ public class Board {
 		for (int i = rowMove - 2, j = colMove - 2; i > 0 && j > 0; --i, --j)
 			if (board[j + 1][i + 1] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[j][i] == currentPlayer)
 				return true;
-			else if (board[j][i] == Piece.Empty)
+			else if (board[j + 1][i + 1] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[j][i] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
 				return false;
 		return false;
 	}
@@ -342,7 +352,7 @@ public class Board {
 		for (int i = rowMove - 2, j = colMove + 2; i > 0 && j < BOARD_SIZE; --i, ++j)
 			if (board[j - 1][i + 1] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[j][i] == currentPlayer)
 				return true;
-			else if (board[j][i] == Piece.Empty)
+			else if (board[j - 1][i + 1] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[j][i] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
 				return false;
 		return false;
 	}
