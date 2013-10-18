@@ -50,6 +50,77 @@ public class Board {
 		return false;
 	}
 
+	/**
+	 * A Piece is considered as irreversible if and only if theses 3 sates are
+	 * correct: - The left or right side are filled by the same piece color -
+	 * The top or bottom side are filled by the same piece color - 2 diagonally
+	 * neighbouring size are filled by the same piece color
+	 */
+	public boolean isIrreversiblePiece(int rowMove, int colMove, Piece currentPlayer) {
+		// State 1
+		boolean isStateOneValid = true;
+		{
+			// Left side
+			isStateOneValid = checkIrreversiblePieceHorizontalLeft(rowMove, colMove, currentPlayer);
+
+			// Right side
+			if (!isStateOneValid)
+				isStateOneValid = checkIrreversiblePieceHorizontalRight(rowMove, colMove, currentPlayer);
+
+			if (!isStateOneValid)
+				return false;
+		}
+
+		// State 2
+		boolean isStateTwoValid = true;
+		{
+			// Top side
+			isStateTwoValid = checkIrreversiblePieceVerticallyTop(rowMove, colMove, currentPlayer);
+
+			// Bottom side
+			if (!isStateTwoValid)
+				isStateTwoValid = checkIrreversiblePieceVerticallyBottom(rowMove, colMove, currentPlayer);
+
+			if (!isStateTwoValid)
+				return false;
+		}
+
+		// State 3
+		boolean isStateThreeValid = true;
+		{
+			// Left diagonals
+			if (checkIrreversiblePieceDiagonalTopLeft(rowMove, colMove, currentPlayer))
+				isStateThreeValid = checkIrreversiblePieceDiagonalBottomLeft(rowMove, colMove, currentPlayer);
+
+			if (isStateThreeValid)
+				return true;
+
+			// Top diagonals
+			isStateThreeValid = true;
+			if (checkIrreversiblePieceDiagonalTopLeft(rowMove, colMove, currentPlayer))
+				isStateThreeValid = checkIrreversiblePieceDiagonalTopRight(rowMove, colMove, currentPlayer);
+
+			if (isStateThreeValid)
+				return true;
+
+			// Right diagonals
+			isStateThreeValid = true;
+			if (checkIrreversiblePieceDiagonalTopRight(rowMove, colMove, currentPlayer))
+				isStateThreeValid = checkIrreversiblePieceDiagonalBottomRight(rowMove, colMove, currentPlayer);
+
+			if (isStateThreeValid)
+				return true;
+
+			// Bottom diagonals
+			isStateThreeValid = true;
+			if (checkIrreversiblePieceDiagonalBottomRight(rowMove, colMove, currentPlayer))
+				isStateThreeValid = checkIrreversiblePieceDiagonalBottomLeft(rowMove, colMove, currentPlayer);
+
+			return isStateThreeValid;// State1 AND State2 AND State3
+		}
+
+	}
+
 	public void getAllPossibleMove(int[] outputArray, Piece currentPlayer) {
 		int indexOutputArray = 0;
 		for (int i = 0; i < BOARD_SIZE; ++i)
@@ -85,6 +156,70 @@ public class Board {
 				System.out.print(board[i][j] + "\t");
 			System.out.println();
 		}
+	}
+
+	private boolean checkIrreversiblePieceVerticallyBottom(int rowMove, int colMove, Piece currentPlayer) {
+		boolean out = true;
+		for (int j = colMove + 1; out && j < BOARD_SIZE; ++j)
+			if (board[j][rowMove] != currentPlayer)
+				out = false;
+		return out;
+	}
+
+	private boolean checkIrreversiblePieceVerticallyTop(int rowMove, int colMove, Piece currentPlayer) {
+		boolean out = true;
+		for (int j = colMove - 1; out && j > 0; --j)
+			if (board[j][rowMove] != currentPlayer)
+				out = false;
+		return out;
+	}
+
+	private boolean checkIrreversiblePieceHorizontalLeft(int rowMove, int colMove, Piece currentPlayer) {
+		boolean out = true;
+		for (int i = rowMove - 1; out && i > 0; --i)
+			if (board[colMove][i] != currentPlayer)
+				out = false;
+		return out;
+	}
+
+	private boolean checkIrreversiblePieceHorizontalRight(int rowMove, int colMove, Piece currentPlayer) {
+		boolean out = true;
+		for (int i = rowMove + 1; out && i < BOARD_SIZE; ++i)
+			if (board[colMove][i] != currentPlayer)
+				out = false;
+		return out;
+	}
+
+	private boolean checkIrreversiblePieceDiagonalBottomRight(int rowMove, int colMove, Piece currentPlayer) {
+		boolean out = true;
+		for (int i = rowMove + 1, j = colMove + 1; out && i < BOARD_SIZE && j < BOARD_SIZE; ++i, ++j)
+			if (board[j][i] != currentPlayer)
+				out = false;
+		return out;
+	}
+
+	private boolean checkIrreversiblePieceDiagonalTopRight(int rowMove, int colMove, Piece currentPlayer) {
+		boolean out = true;
+		for (int i = rowMove - 1, j = colMove + 1; out && i > 0 && j < BOARD_SIZE; --i, ++j)
+			if (board[j][i] != currentPlayer)
+				out = false;
+		return out;
+	}
+
+	private boolean checkIrreversiblePieceDiagonalTopLeft(int rowMove, int colMove, Piece currentPlayer) {
+		boolean out = true;
+		for (int i = rowMove - 1, j = colMove - 1; out && i > 0 && j > 0; --i, --j)
+			if (board[j][i] != currentPlayer)
+				out = false;
+		return out;
+	}
+
+	private boolean checkIrreversiblePieceDiagonalBottomLeft(int rowMove, int colMove, Piece currentPlayer) {
+		boolean out = true;
+		for (int i = rowMove + 1, j = colMove - 1; out && i < BOARD_SIZE && j > 0; ++i, --j)
+			if (board[j][i] != currentPlayer)
+				out = false;
+		return out;
 	}
 
 	private void init() {
