@@ -34,22 +34,25 @@ public class Joueur extends Othello.Joueur {
 		if (move != null) 
 		{
 			System.out.println("Coup adverse: " + move.i + ", " + move.j);
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~BEGIN");
+			board.debug__Board();
 			board.addPiece(move.i, move.j, player == Piece.Red ? Piece.Blue : Piece.Red);
-			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~PLAYER");
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~END");
 			board.debug__Board();
 		}
 		
 		result = (Move) Compute.alphabeta(board, depth, 1, Compute._INF)[1];
 		
-		//System.out.println("Votre coup: ");
-		//System.out.print("Colonne (-1 si aucun coup possible): ");
-		//int i = stdin.nextInt();
-		//if (i != -1) {
-			//System.out.print("Ligne: ");
-			//int j =  stdin.nextInt();
-			//result = new Move(i,j);
+		if(result != null)
+		{
+			System.out.println("Coup nous: " + result.i + ", " + result.j);
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~BEGIN2");
+			board.debug__Board();
 			board.addPiece(result.i, result.j, player);
-		//}
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~END2");
+			board.debug__Board();
+		}
+
 		return result;
 	}
 
