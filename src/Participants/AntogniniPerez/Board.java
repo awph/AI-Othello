@@ -2,353 +2,254 @@ package Participants.AntogniniPerez;
 
 import java.util.Arrays;
 
-import Othello.Move;
-
 public class Board {
 
-	public static final int DUMMY_VALUE = -1;// To know where to stop in the
-												// possible move array
-
+	//DO NOT TOUCH THOSE 3 VARIABLES
+	public static final int Blue = 1;
+	public static final int Red = -1;
+	public static final int Empty = 0;
+	
+	public static final int DUMMY_VALUE = -1;// To know where to stop in the possible move array
+	
 	private static final int BOARD_SIZE = 8;
-	private Piece[][] board; // [Cols][Rows]
-	private Piece player;
-
-	public Board(Piece player) {
-		board = new Piece[BOARD_SIZE][BOARD_SIZE];
-		this.player = player;
+	
+	private int[][] board;//Row major
+	
+	public void debug__Board()
+	{
+		for(int[] b : board)
+		{
+			for(int bb : b)
+				System.out.print(bb + "\t");
+			System.out.println();
+		}
+	}
+	
+	public void debug__addPiece(int row, int col, int currentPlayer)
+	{
+		System.out.println("Player : " + currentPlayer);
+		System.out.println("Row : " + row + " Col : " + col);
+		System.out.println(checkHorizontallyLeft2Right(row, col, currentPlayer)); 
+		System.out.println(checkHorizontallyRight2Left(row, col, currentPlayer)); 
+		System.out.println(checkVerticallyTop2Bottom(row, col, currentPlayer)); 
+		System.out.println(checkVerticallyBottom2Top(row, col, currentPlayer));
+		System.out.println(checkDiagonallyBottomLeft2TopRight(row, col, currentPlayer));
+		System.out.println(checkDiagonallyBottomRight2TopLeft(row, col, currentPlayer));
+		System.out.println(checkDiagonallyTopRight2BottomLeft(row, col, currentPlayer));
+		System.out.println(checkDiagonallyTopLeft2BottomRight(row, col, currentPlayer));
+		
+		addPiece(row, col, currentPlayer);
+	}
+	
+	public Board()
+	{
+		board = new int[BOARD_SIZE][BOARD_SIZE];
 		init();
 	}
-
-	/**
-	 * Board must be of size Board::BOARD_SIZExBoard::BOARD_SIZE
-	 */
-	public Board(Board board) {
-		this(board.player);
-		for (int i = 0; i < BOARD_SIZE; ++i)
-			for (int j = 0; j < BOARD_SIZE; ++j)
-				this.board[j][i] = board.board[j][i];
+	
+	public Board(Board board)
+	{
+		this();
+		for(int i = 0; i < BOARD_SIZE; ++i)
+			for(int j = 0; j < BOARD_SIZE; ++j)
+				this.board[i][j] = board.board[i][j];
 	}
-
-	public boolean addPiece(int rowMove, int colMove, Piece currentPlayer) {
-		if (player == currentPlayer && !isLegit(rowMove, colMove, currentPlayer))
-			return false;
-
-		update(rowMove, colMove, currentPlayer);
-
-		return true;
+	
+	public void init()
+	{
+		for(int i = 0; i < 8; ++i)
+			Arrays.fill(board[i], Empty);
+		
+		board[BOARD_SIZE/2-1][BOARD_SIZE/2-1] = Blue;
+		board[BOARD_SIZE/2][BOARD_SIZE/2] = Blue;
+		board[BOARD_SIZE/2-1][BOARD_SIZE/2] = Red;
+		board[BOARD_SIZE/2][BOARD_SIZE/2-1] = Red;
 	}
-
-	public boolean isFinished() {
-		for (int i = 0; i < BOARD_SIZE; ++i)
-			for (int j = 0; j < BOARD_SIZE; ++j)
-				if (board[j][i] == Piece.Empty && (isLegit(i, j, Piece.Blue) || isLegit(i, j, Piece.Red)))
-					return false;
-		return true;
+	
+	//We suppose that we always receive a valid move via the method getAllPossibleMove
+	public void addPiece(int row, int col, int currentPlayer)
+	{
+		board[row][col] = currentPlayer;
+		int oppositePlayer = -currentPlayer;
+		
+		if(checkHorizontallyLeft2Right(row, col, currentPlayer))
+			for(int j = col + 1; j < BOARD_SIZE && board[row][j] == oppositePlayer; ++j)
+				board[row][j] = currentPlayer;
+		
+		if(checkHorizontallyRight2Left(row, col, currentPlayer))
+			for(int j = col - 1; j >= 0 && board[row][j] == oppositePlayer; --j)
+				board[row][j] = currentPlayer;
+		
+		if(checkVerticallyTop2Bottom(row, col, currentPlayer))
+			for(int i = row + 1; i < BOARD_SIZE && board[i][col] == oppositePlayer; ++i)
+				board[i][col] = currentPlayer;
+		
+		if(checkVerticallyBottom2Top(row, col, currentPlayer))
+			for(int i = row - 1; i >= 0 && board[i][col] == oppositePlayer; --i)
+				board[i][col] = currentPlayer;
+		
+		if(checkDiagonallyBottomLeft2TopRight(row, col, currentPlayer))
+			for(int i = row - 1, j = col + 1; i >= 0 && j < BOARD_SIZE && board[i][j] == oppositePlayer; --i, ++j)
+				board[i][j] = currentPlayer;
+		
+		if(checkDiagonallyBottomRight2TopLeft(row, col, currentPlayer))
+			for(int i = row - 1, j = col - 1; i >= 0 && j >= 0 && board[i][j] == oppositePlayer; --i, --j)
+				board[i][j] = currentPlayer;
+		
+		if(checkDiagonallyTopRight2BottomLeft(row, col, currentPlayer))
+			for(int i = row + 1, j = col - 1; i < BOARD_SIZE && j >= 0 && board[i][j] == oppositePlayer; ++i, --j)
+				board[i][j] = currentPlayer;
+		
+		if(checkDiagonallyTopLeft2BottomRight(row, col, currentPlayer))
+			for(int i = row + 1, j = col + 1; i < BOARD_SIZE && j < BOARD_SIZE && board[i][j] == oppositePlayer; ++i, ++j)
+				board[i][j] = currentPlayer;			
 	}
-
-	/**
-	 * A Piece is considered as irreversible if and only if theses 3 sates are
-	 * correct: - The left or right side are filled by the same piece color -
-	 * The top or bottom side are filled by the same piece color - 2 diagonally
-	 * neighbouring size are filled by the same piece color
-	 */
-	public boolean isIrreversiblePiece(int rowMove, int colMove, Piece currentPlayer) {
-		// State 1
-		boolean isStateOneValid = true;
-		{
-			// Left side
-			isStateOneValid = checkIrreversiblePieceHorizontalLeft(rowMove, colMove, currentPlayer);
-
-			// Right side
-			if (!isStateOneValid)
-				isStateOneValid = checkIrreversiblePieceHorizontalRight(rowMove, colMove, currentPlayer);
-
-			if (!isStateOneValid)
-				return false;
-		}
-
-		// State 2
-		boolean isStateTwoValid = true;
-		{
-			// Top side
-			isStateTwoValid = checkIrreversiblePieceVerticallyTop(rowMove, colMove, currentPlayer);
-
-			// Bottom side
-			if (!isStateTwoValid)
-				isStateTwoValid = checkIrreversiblePieceVerticallyBottom(rowMove, colMove, currentPlayer);
-
-			if (!isStateTwoValid)
-				return false;
-		}
-
-		// State 3
-		boolean isStateThreeValid = true;
-		{
-			// Left diagonals
-			if (checkIrreversiblePieceDiagonalTopLeft(rowMove, colMove, currentPlayer))
-				isStateThreeValid = checkIrreversiblePieceDiagonalBottomLeft(rowMove, colMove, currentPlayer);
-
-			if (isStateThreeValid)
-				return true;
-
-			// Top diagonals
-			isStateThreeValid = true;
-			if (checkIrreversiblePieceDiagonalTopLeft(rowMove, colMove, currentPlayer))
-				isStateThreeValid = checkIrreversiblePieceDiagonalTopRight(rowMove, colMove, currentPlayer);
-
-			if (isStateThreeValid)
-				return true;
-
-			// Right diagonals
-			isStateThreeValid = true;
-			if (checkIrreversiblePieceDiagonalTopRight(rowMove, colMove, currentPlayer))
-				isStateThreeValid = checkIrreversiblePieceDiagonalBottomRight(rowMove, colMove, currentPlayer);
-
-			if (isStateThreeValid)
-				return true;
-
-			// Bottom diagonals
-			isStateThreeValid = true;
-			if (checkIrreversiblePieceDiagonalBottomRight(rowMove, colMove, currentPlayer))
-				isStateThreeValid = checkIrreversiblePieceDiagonalBottomLeft(rowMove, colMove, currentPlayer);
-
-			return isStateThreeValid;// State1 AND State2 AND State3
-		}
-
-	}
-
-	public void getAllPossibleMove(int[] outputArray, Piece currentPlayer) {
+	
+	public void getAllPossibleMove(int[] outputArray, int currentPlayer)
+	{
 		int indexOutputArray = 0;
-		for (int i = 0; i < BOARD_SIZE; ++i)
-			for (int j = 0; j < BOARD_SIZE; ++j)
-				if (board[j][i] == Piece.Empty && isLegit(i, j, currentPlayer)) {
+		for(int i = 0; i < BOARD_SIZE; ++i)
+			for(int j = 0; j < BOARD_SIZE; ++j)
+				if(board[i][j] == Empty && isLegit(i, j, currentPlayer))
+				{
 					outputArray[indexOutputArray++] = i;
 					outputArray[indexOutputArray++] = j;
 				}
 		outputArray[indexOutputArray] = DUMMY_VALUE;
 	}
-
-	public int getFinalPoints(Piece currentPlayer) {
-		int mine = 0, his = 0, empty = 0;
-
-		for (int i = 0; i < BOARD_SIZE; ++i)
-			for (int j = 0; j < BOARD_SIZE; ++j)
-				if (board[i][j] == currentPlayer)
-					++mine;
-				else if (board[i][j] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
-					++his;
+	
+	public boolean isTheGameEnded()
+	{
+		for(int i = 0; i < BOARD_SIZE; ++i)
+			for(int j = 0; j < BOARD_SIZE; ++j)
+				if(board[i][j] == Empty && (isLegit(i, j, Blue) || isLegit(i, j, Red)))
+					return false;
+		return true;
+	}
+	
+	public int getFinalPoints(int currentPlayer)
+	{
+		int current = 0, opposite = 0, empty = 0;
+		int oppositePlayer = -currentPlayer;
+		
+		for(int i = 0; i < BOARD_SIZE; ++i)
+			for(int j = 0; j < BOARD_SIZE; ++j)
+				if(board[i][j] == currentPlayer)
+					++current;
+				else if(board[i][j] == oppositePlayer)
+					++opposite;
 				else
 					++empty;
-
-		if (mine > his)
-			return mine + empty;
+		
+		if(current > opposite)
+			return current+empty;
+		else if(current < opposite)
+			return opposite+empty;
 		else
-			return mine;
+			return current; //We do nothing special if there is the same number of piece blue & red and some empty cases
+			
 	}
-
-	public void debug__Board() {
-		for (int i = 0; i < BOARD_SIZE; ++i) {
-			for (int j = 0; j < BOARD_SIZE; ++j)
-				System.out.print(board[i][j] + "\t");
-			System.out.println();
-		}
+	
+	private boolean isLegit(int row, int col, int currentPlayer)
+	{
+		return  checkHorizontallyLeft2Right(row, col, currentPlayer) || 
+				checkHorizontallyRight2Left(row, col, currentPlayer) || 
+				
+				checkVerticallyTop2Bottom(row, col, currentPlayer) || 
+				checkVerticallyBottom2Top(row, col, currentPlayer) ||
+				
+				checkDiagonallyBottomLeft2TopRight(row, col, currentPlayer) ||
+				checkDiagonallyBottomRight2TopLeft(row, col, currentPlayer) ||
+				
+				checkDiagonallyTopRight2BottomLeft(row, col, currentPlayer) ||
+				checkDiagonallyTopLeft2BottomRight(row, col, currentPlayer);
 	}
-
-	private boolean checkIrreversiblePieceVerticallyBottom(int rowMove, int colMove, Piece currentPlayer) {
-		boolean out = true;
-		for (int j = colMove + 1; out && j < BOARD_SIZE; ++j)
-			if (board[j][rowMove] != currentPlayer)
-				out = false;
-		return out;
-	}
-
-	private boolean checkIrreversiblePieceVerticallyTop(int rowMove, int colMove, Piece currentPlayer) {
-		boolean out = true;
-		for (int j = colMove - 1; out && j >= 0; --j)
-			if (board[j][rowMove] != currentPlayer)
-				out = false;
-		return out;
-	}
-
-	private boolean checkIrreversiblePieceHorizontalLeft(int rowMove, int colMove, Piece currentPlayer) {
-		boolean out = true;
-		for (int i = rowMove - 1; out && i >= 0; --i)
-			if (board[colMove][i] != currentPlayer)
-				out = false;
-		return out;
-	}
-
-	private boolean checkIrreversiblePieceHorizontalRight(int rowMove, int colMove, Piece currentPlayer) {
-		boolean out = true;
-		for (int i = rowMove + 1; out && i < BOARD_SIZE; ++i)
-			if (board[colMove][i] != currentPlayer)
-				out = false;
-		return out;
-	}
-
-	private boolean checkIrreversiblePieceDiagonalBottomRight(int rowMove, int colMove, Piece currentPlayer) {
-		boolean out = true;
-		for (int i = rowMove + 1, j = colMove + 1; out && i < BOARD_SIZE && j < BOARD_SIZE; ++i, ++j)
-			if (board[j][i] != currentPlayer)
-				out = false;
-		return out;
-	}
-
-	private boolean checkIrreversiblePieceDiagonalTopRight(int rowMove, int colMove, Piece currentPlayer) {
-		boolean out = true;
-		for (int i = rowMove - 1, j = colMove + 1; out && i >= 0 && j < BOARD_SIZE; --i, ++j)
-			if (board[j][i] != currentPlayer)
-				out = false;
-		return out;
-	}
-
-	private boolean checkIrreversiblePieceDiagonalTopLeft(int rowMove, int colMove, Piece currentPlayer) {
-		boolean out = true;
-		for (int i = rowMove - 1, j = colMove - 1; out && i >= 0 && j >= 0; --i, --j)
-			if (board[j][i] != currentPlayer)
-				out = false;
-		return out;
-	}
-
-	private boolean checkIrreversiblePieceDiagonalBottomLeft(int rowMove, int colMove, Piece currentPlayer) {
-		boolean out = true;
-		for (int i = rowMove + 1, j = colMove - 1; out && i < BOARD_SIZE && j >= 0; ++i, --j)
-			if (board[j][i] != currentPlayer)
-				out = false;
-		return out;
-	}
-
-	private void init() {
-		for (int i = 0; i < board.length; ++i)
-			Arrays.fill(board[i], Piece.Empty);
-
-		board[BOARD_SIZE / 2 - 1][BOARD_SIZE / 2 - 1] = Piece.Blue;
-		board[BOARD_SIZE / 2][BOARD_SIZE / 2] = Piece.Blue;
-		board[BOARD_SIZE / 2][BOARD_SIZE / 2 - 1] = Piece.Red;
-		board[BOARD_SIZE / 2 - 1][BOARD_SIZE / 2] = Piece.Red;
-	}
-
-	private void update(int rowMove, int colMove, Piece currentPlayer) {
-		board[colMove][rowMove] = currentPlayer;
-
-		// Replace all the opposite pieces
-		if (checkHorizontallyLeftToRight(rowMove, colMove, currentPlayer))
-			for (int i = colMove + 1; i < BOARD_SIZE && board[i][rowMove] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); ++i)
-				board[i][rowMove] = currentPlayer;
-
-		if (checkHorizontallyRightToLeft(rowMove, colMove, currentPlayer))
-			for (int i = colMove - 1; i >= 0 && board[i][rowMove] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); --i)
-				board[i][rowMove] = currentPlayer;
-
-		if (checkVerticallyTopToBottom(rowMove, colMove, currentPlayer))
-			for (int j = rowMove + 1; j < BOARD_SIZE && board[colMove][j] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); ++j)
-				board[colMove][j] = currentPlayer;
-
-		if (checkVerticallyBottomToTop(rowMove, colMove, currentPlayer))
-			for (int j = rowMove - 1; j >= 0 && board[colMove][j] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); --j)
-				board[colMove][j] = currentPlayer;
-
-		if (checkDiagonallyTopLeftToBottomRight(rowMove, colMove, currentPlayer))
-			for (int i = colMove + 1, j = rowMove + 1; i < BOARD_SIZE && j < BOARD_SIZE && board[i][j] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); ++i, ++j)
-				board[i][j] = currentPlayer;
-
-		if (checkDiagonallyBottomLeftToTopRight(rowMove, colMove, currentPlayer))
-			for (int i = colMove + 1, j = rowMove - 1; i < BOARD_SIZE && j >= 0 && board[i][j] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); ++i, --j)
-				board[i][j] = currentPlayer;
-
-		if (checkDiagonallyTopRightToBottomLeft(rowMove, colMove, currentPlayer))
-			for (int i = colMove - 1, j = rowMove + 1; i >= 0 && j < BOARD_SIZE && board[i][j] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); --i, ++j)
-				board[i][j] = currentPlayer;
-
-		if (checkDiagonallyBottomRightToTopLeft(rowMove, colMove, currentPlayer))
-			for (int i = colMove - 1, j = rowMove - 1; i >= 0 && j >= 0 && board[i][j] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue); --i, --j)
-				board[i][j] = currentPlayer;
-	}
-
-	private boolean isLegit(int rowMove, int colMove, Piece currentPlayer) {
-		return (checkHorizontallyLeftToRight(rowMove, colMove, currentPlayer) || checkHorizontallyRightToLeft(rowMove, colMove, currentPlayer) || checkVerticallyTopToBottom(rowMove, colMove, currentPlayer) || checkVerticallyBottomToTop(rowMove, colMove, currentPlayer) || checkDiagonallyTopLeftToBottomRight(rowMove, colMove, currentPlayer) || checkDiagonallyBottomLeftToTopRight(rowMove, colMove, currentPlayer) || checkDiagonallyTopRightToBottomLeft(rowMove, colMove, currentPlayer) || checkDiagonallyBottomRightToTopLeft(
-				rowMove, colMove, currentPlayer));
-	}
-
-	private boolean checkHorizontallyLeftToRight(int rowMove, int colMove, Piece currentPlayer) {
-		for (int i = colMove + 2; i < BOARD_SIZE; ++i) {
-			if (board[i - 1][rowMove] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[i][rowMove] == currentPlayer)
+	
+	private boolean checkHorizontallyLeft2Right(int row, int col, int currentPlayer)
+	{
+		int oppositePlayer = -currentPlayer;
+		for(int j = col + 2; j < BOARD_SIZE; ++j)
+			if(board[row][j-1] == oppositePlayer && board[row][j] == currentPlayer)
 				return true;
-			else if (board[i - 1][rowMove] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[i][colMove] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
-				return false;
-		}
-		return false;
-	}
-
-	private boolean checkHorizontallyRightToLeft(int rowMove, int colMove, Piece currentPlayer) {
-		for (int i = colMove - 2; i >= 0; --i)
-			if (board[i+1][rowMove] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[i][rowMove] == currentPlayer)
-				return true;
-			else if (board[i+1][rowMove] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[i][rowMove] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
+			else if(board[row][j-1] != oppositePlayer || board[row][j] != oppositePlayer)
 				return false;
 		return false;
 	}
-
-	private boolean checkVerticallyTopToBottom(int rowMove, int colMove, Piece currentPlayer) {
-		System.out.println("T : " + rowMove + " " + colMove);
-		for (int j = rowMove + 2; j < BOARD_SIZE; ++j)
-		{
-			System.out.println(board[colMove][j - 1] + " " + board[colMove][j]);
-			System.out.println(j + " " + colMove);
-			if (board[colMove][j - 1] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[colMove][j] == currentPlayer)
+	
+	private boolean checkHorizontallyRight2Left(int row, int col, int currentPlayer)
+	{
+		int oppositePlayer = -currentPlayer;
+		for(int j = col - 2; j >= 0; --j)
+			if(board[row][j+1] == oppositePlayer && board[row][j] == currentPlayer)
 				return true;
-			else if (board[colMove][j - 1] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[colMove][j] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
+			else if(board[row][j+1] != oppositePlayer || board[row][j] != oppositePlayer)
 				return false;
-		}
-		return false;
+		return false;		
 	}
-
-	private boolean checkVerticallyBottomToTop(int rowMove, int colMove, Piece currentPlayer) {
-		for (int j = rowMove - 2; j >= 0; --j)
-			if (board[colMove][j + 1] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[colMove][j] == currentPlayer)
+	
+	private boolean checkVerticallyTop2Bottom(int row, int col, int currentPlayer)
+	{
+		int oppositePlayer = -currentPlayer;
+		for(int i = row + 2; i < BOARD_SIZE; ++i)
+			if(board[i-1][col] == oppositePlayer && board[i][col] == currentPlayer)
 				return true;
-			else if (board[colMove][j + 1] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[colMove][j] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
-				return false;
-		return false;
-	}
-
-	private boolean checkDiagonallyTopLeftToBottomRight(int rowMove, int colMove, Piece currentPlayer) {
-		for (int i = colMove + 2, j = rowMove + 2; i < BOARD_SIZE && j < BOARD_SIZE; ++i, ++j)
-			if (board[i - 1][j - 1] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[i][j] == currentPlayer)
-				return true;
-			else if (board[i - 1][j - 1] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[i][j] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
+			else if(board[i-1][col] != oppositePlayer || board[i][col] != oppositePlayer)
 				return false;
 		return false;
 	}
-
-	private boolean checkDiagonallyBottomLeftToTopRight(int rowMove, int colMove, Piece currentPlayer) {
-		for (int i = colMove + 2, j = rowMove - 2; i < BOARD_SIZE && j >= 0; ++i, --j)
-			if (board[i - 1][j + 1] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[i][j] == currentPlayer)
+	
+	private boolean checkVerticallyBottom2Top(int row, int col, int currentPlayer)
+	{
+		int oppositePlayer = -currentPlayer;
+		for(int i = row - 2; i >= 0; --i)
+			if(board[i+1][col] == oppositePlayer && board[i][col] == currentPlayer)
 				return true;
-			else if (board[i - 1][j + 1] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[i][j] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
+			else if(board[i+1][col] != oppositePlayer || board[i][col] != oppositePlayer)
+				return false;
+		return false;	
+	}
+	
+	private boolean checkDiagonallyTopLeft2BottomRight(int row, int col, int currentPlayer)
+	{
+		int oppositePlayer = -currentPlayer;
+		for(int i = row + 2, j = col + 2; i < BOARD_SIZE && j < BOARD_SIZE; ++i, ++j)
+			if(board[i-1][j-1] == oppositePlayer && board[i][j] == currentPlayer)
+				return true;
+			else if(board[i-1][j-1] != oppositePlayer || board[i][j] != oppositePlayer)
 				return false;
 		return false;
 	}
-
-	private boolean checkDiagonallyTopRightToBottomLeft(int rowMove, int colMove, Piece currentPlayer) {
-		for (int i = colMove - 2, j = rowMove + 2; i >= 0 && j < BOARD_SIZE; --i, ++j)
-			if (board[i + 1][j - 1] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[i][j] == currentPlayer)
+	
+	private boolean checkDiagonallyBottomRight2TopLeft(int row, int col, int currentPlayer)
+	{
+		int oppositePlayer = -currentPlayer;
+		for(int i = row - 2, j = col - 2; i >= 0 && j >= 0; --i, --j)
+			if(board[i+1][j+1] == oppositePlayer && board[i][j] == currentPlayer)
 				return true;
-			else if (board[i + 1][j - 1] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[i][j] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
+			else if(board[i+1][j+1] != oppositePlayer || board[i][j] != oppositePlayer)
 				return false;
 		return false;
 	}
-
-	private boolean checkDiagonallyBottomRightToTopLeft(int rowMove, int colMove, Piece currentPlayer) {
-		for (int i = colMove - 2, j = rowMove - 2; i >= 0 && j >= 0; --i, --j)
-			if (board[i + 1][j + 1] == (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) && board[i][j] == currentPlayer)
+	
+	private boolean checkDiagonallyTopRight2BottomLeft(int row, int col, int currentPlayer)
+	{
+		int oppositePlayer = -currentPlayer;
+		for(int i = row + 2, j = col - 2; i < BOARD_SIZE && j >= 0; ++i, --j)
+			if(board[i-1][j+1] == oppositePlayer && board[i][j] == currentPlayer)
 				return true;
-			else if (board[i + 1][j + 1] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue) || board[i][j] != (currentPlayer == Piece.Blue ? Piece.Red : Piece.Blue))
+			else if(board[i-1][j+1] != oppositePlayer || board[i][j] != oppositePlayer)
 				return false;
 		return false;
 	}
-
-	public Piece getPlayer() {
-		return player;
+	
+	private boolean checkDiagonallyBottomLeft2TopRight(int row, int col, int currentPlayer)
+	{
+		int oppositePlayer = -currentPlayer;
+		for(int i = row - 2, j = col + 2; i >= 0 && j < BOARD_SIZE; --i, ++j)
+			if(board[i+1][j-1] == oppositePlayer && board[i][j] == currentPlayer)
+				return true;
+			else if(board[i+1][j-1] != oppositePlayer || board[i][j] != oppositePlayer)
+				return false;
+		return false;
 	}
 }
