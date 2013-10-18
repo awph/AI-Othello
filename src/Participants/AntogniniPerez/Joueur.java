@@ -8,11 +8,14 @@ public class Joueur extends Othello.Joueur {
 
 	private Board board;
 	private Piece player;
+	private int[] allPossibleMove;
+	
 	// playerID: 0 = red, 1 = blue
 	public Joueur(int depth, int playerID) 
 	{
 		super();
 		player = playerID == 1 ? Piece.Blue : Piece.Red;
+		allPossibleMove = new int[121];
 		board = new Board(player);
 	}
 
