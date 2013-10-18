@@ -33,7 +33,7 @@ public class Joueur extends Othello.Joueur {
 		if (move != null) 
 		{
 			System.out.println("Coup adverse: " + move.i + ", " + move.j);
-			board.addPiece(move, player == Piece.Red ? Piece.Blue : Piece.Red);
+			board.addPiece(move.i, move.j, player == Piece.Red ? Piece.Blue : Piece.Red);
 		}
 		
 		System.out.println("Votre coup: ");
@@ -43,7 +43,7 @@ public class Joueur extends Othello.Joueur {
 			System.out.print("Ligne: ");
 			int j =  stdin.nextInt();
 			result = new Move(i,j);
-			board.addPiece(result, player);
+			board.addPiece(result.i, result.j, player);
 		}
 		return result;
 	}
