@@ -17,6 +17,17 @@ public class Board {
 		init();
 	}
 
+	/**
+	 * Board must be of size Board::BOARD_SIZExBoard::BOARD_SIZE
+	 */
+	public Board(Piece player, Board board)
+	{
+		this(player);
+		for(int i = 0; i < BOARD_SIZE; ++i)
+			for(int j = 0; j < BOARD_SIZE; ++j)
+				this.board[j][i] = board.board[j][i];
+	}
+	
 	public boolean addPiece(Move move, Piece currentPlayer) {
 		if (player == currentPlayer && !isLegit(move, currentPlayer))
 			return false;
