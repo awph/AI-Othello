@@ -41,6 +41,27 @@ public class Board {
 		addPiece(row, col, currentPlayer);
 	}
 	
+	//Debug a state
+	public Board(boolean debug)
+	{
+		board = new int[][]
+				{
+				{1, 1, 1, 1, 1, 0, 0, 0},
+				{1, 1, 1, 1, 1, 1, 0, 0},
+				{1, -1, 1, -1, 0, 0, 0, 0},
+				{1, -1, 0, -1, -1, 0, 0, 0},
+				{1, -1, 1, -1, -1, 0, 0, 0},
+				{1, 1, 0, -1, 0, -1, 0, 0},
+				{1, 0, -1, -1, 0, 0, 0, 0},
+				{0, 0, 0, -1, 0, 0, 0, 0}
+				};
+		debug__Board();
+		int[] possiblesMoves = new int[121];
+		getAllPossibleMove(possiblesMoves, -1);
+		for(int i : possiblesMoves)
+			System.out.print(i + ", ");
+	}
+	
 	public Board()
 	{
 		board = new int[BOARD_SIZE][BOARD_SIZE];
@@ -49,7 +70,8 @@ public class Board {
 	
 	public Board(Board board)
 	{
-		this();
+		//Don't need the init
+		this.board = new int[BOARD_SIZE][BOARD_SIZE];
 		for(int i = 0; i < BOARD_SIZE; ++i)
 			for(int j = 0; j < BOARD_SIZE; ++j)
 				this.board[i][j] = board.board[i][j];

@@ -23,6 +23,10 @@ public class Joueur extends Othello.Joueur {
 	
 	public Move nextPlay(Move move) 
 	{
+		//DEBUG
+		//Board board = new Board(true);
+		//Move result = null;
+		
 		if (move != null) 
 		{
 			System.out.println("Coup adverse : (" + move.j + ", " + move.i + ") Player : " + oppositePlayer);
