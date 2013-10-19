@@ -1,5 +1,7 @@
 package Participants.AntogniniPerez;
 
+import java.util.Arrays;
+
 import Othello.Move;
 
 public class Compute {
@@ -14,8 +16,8 @@ public class Compute {
 		
 		double optVal = minOrMax * -INF;
 		Move optOp = null;
-		int[] allPossibleMoves = new int[121];
 		
+		int[] allPossibleMoves = new int[121];
 		root.getAllPossibleMove(allPossibleMoves, currentPlayer);
 		
 		for(int i = 0; allPossibleMoves[i] > Board.DUMMY_VALUE; i += 2)
@@ -33,12 +35,25 @@ public class Compute {
 					break;
 			}
 		}
-		//System.out.println(optOp.j + ", " + optOp.i);
+		
 		return new Object[] {optVal, optOp};
 	}
 	
 	private static double eval(Board root, int currentPlayer) 
 	{
-        return (Math.random()*(10)*root.getFinalPoints(currentPlayer));
+		double scoreAtEndOfGameCurrentPlayer = root.getScoreAtEndOfGame(currentPlayer);
+		//double scoreAtEndOfGameOppositePlayer = 64 - scoreAtEndOfGameCurrentPlayer;
+		
+		double positionScoreCurrentPlayer = root.getPositionScore(currentPlayer);
+		double positionScoreOppositePlayer = root.getPositionScore(-currentPlayer);
+		
+		double mobilityScoreCurrentPlayer = root.getMobilityScore(currentPlayer);
+		double mobilityScoreOppositePlayer = root.getMobilityScore(-currentPlayer);
+		
+		double irreverisblePiecesCurrentPlayer = root.getNbIrreversiblePiece(currentPlayer);
+		double irreverisblePiecesOppositePlayer = root.getNbIrreversiblePiece(-currentPlayer);
+		
+		//Find a better way, this sucks
+        return 1.5*scoreAtEndOfGameCurrentPlayer + 2.5*(positionScoreCurrentPlayer-positionScoreOppositePlayer) + 4.5*mobilityScoreCurrentPlayer*10/mobilityScoreOppositePlayer + 5*(irreverisblePiecesCurrentPlayer-irreverisblePiecesOppositePlayer);
 	}
 }
