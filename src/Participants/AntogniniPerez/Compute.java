@@ -44,15 +44,15 @@ public class Compute {
 	
 	private static double eval(Board root, int currentPlayer,int depth) 
 	{
-		//[-1;1] f(t) -> 1 -> Good
 		double scorePieceDifference = root.getPieceDifference(currentPlayer);
 		double scoreCornerOccupacy = root.getCornerOccupacy(currentPlayer);
 		double scoreCornerCloseness = root.getCornerCloseness(currentPlayer);
 		double scoreMobilityScore = root.getMobilityScore(currentPlayer);
 		double scoreFrontierDiscs = root.getFrontierDiscs(currentPlayer);
 		double scoreDiscSquare = root.getDiscSquares(currentPlayer);
-		double scoreIrreversiblePiece = root.getIrreversiblePiece(currentPlayer);//€N
-		double scoreParity = (root.getParity(currentPlayer) ? 1 : 0);//Bool
+		double scoreIrreversiblePiece = root.getNbIrreversiblePiece(currentPlayer);
+		double scoreParity = (root.getParity(currentPlayer) ? 1 : 0);
+		
 		double score = 0;
 		switch(depth)
 		{
@@ -66,14 +66,14 @@ public class Compute {
 			case 7:
 			case 8:
 			case 9:
-				score =   1.0 * scorePieceDifference
-						+ 1.0 * scoreCornerOccupacy
-						+ 1.0 * scoreCornerCloseness
-						+ 1.0 * scoreMobilityScore
-						+ 1.0 * scoreFrontierDiscs
-						+ 1.0 * scoreDiscSquare
-						+ 1.0 * scoreIrreversiblePiece
-						+ 1.0 * scoreParity;
+				score =   1 * scorePieceDifference
+						+ 1 * scoreCornerOccupacy
+						+ 1 * scoreCornerCloseness
+						+ 1 * scoreMobilityScore
+						+ 1 * scoreFrontierDiscs
+						+ 1 * scoreDiscSquare
+						+ 1 * scoreIrreversiblePiece
+						+ 1 * scoreParity;
 			break;
 		}
 		

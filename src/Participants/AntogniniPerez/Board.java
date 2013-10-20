@@ -29,9 +29,9 @@ public class Board {
 	
 	private int[][] board;//Row major
 	private int oldPlayer;	
-	private int maxPositionScore;
 	private boolean hasAPlayerPassed;
 	private int ithMove;
+	
 	public Board()
 	{
 		board = new int[BOARD_SIZE][BOARD_SIZE];
@@ -58,11 +58,7 @@ public class Board {
 		
 		oldPlayer = Blue;
 		hasAPlayerPassed = false;
-		maxPositionScore = 0;
-
-		for(int i = 0; i < BOARD_SIZE/2; ++i)
-			for(int j = 0; j < BOARD_SIZE/2; ++j)
-				maxPositionScore += POSITION_SCORE[i][j];
+		ithMove = 0;
 	}
 	
 	//We suppose that we always receive a valid move via the method getAllPossibleMove
@@ -105,6 +101,7 @@ public class Board {
 	{
 		return ithMove;
 	}
+	
 	/*
 	 *========================================================*
 	 *					COMPUTATIONAL PART
@@ -234,39 +231,34 @@ public class Board {
 	
 	public double getPieceDifference(int currentPlayer)
 	{
-		int red = 0, blue = 0;
+		int his = 0, mine = 0;
 		for(int i = 0; i < BOARD_SIZE; ++i)
 			for(int j = 0; j < BOARD_SIZE; ++j)
-				if(board[i][j] == Blue)
-					++blue;
-				else if(board[i][j] == Red)
-					++red;
+				if(board[i][j] == currentPlayer)
+					++mine;
+				else if(board[i][j] == -currentPlayer)
+					++his;
 		
-		if(red == blue)
-			return 0;
-		else if(blue > red)
-			return currentPlayer*(double)(blue)/(blue+red);
-		else
-			return -currentPlayer*(double)(red)/(blue+red);
+		return mine-his;
 	}
 	
 	public double getCornerOccupacy(int currentPlayer)
 	{
-		int blue = 0, red = 0;
+		int mine = 0, his = 0;
 		
 		for(int i = 0; i <= 1; ++i)
 			for(int j = 0; j <= 1; ++j)
-				if(board[i*(BOARD_SIZE-1)][j*(BOARD_SIZE-1)] == Blue)
-					++blue;
-				else if(board[i*(BOARD_SIZE-1)][j*(BOARD_SIZE-1)] == Red)
-					++red;
+				if(board[i*(BOARD_SIZE-1)][j*(BOARD_SIZE-1)] == currentPlayer)
+					++mine;
+				else if(board[i*(BOARD_SIZE-1)][j*(BOARD_SIZE-1)] == -currentPlayer)
+					++his;
 		
-		return currentPlayer*0.25*(blue-red);
+		return mine-his;
 	}
 	
 	public double getCornerCloseness(int currentPlayer)
 	{
-		int blue = 0, red = 0;
+		int mine = 0, his = 0;
 		
 		for(int i = 0; i <= 1; ++i)
 			for(int j = 0; j <= 1; ++j)
@@ -286,24 +278,24 @@ public class Board {
 						jj += BOARD_SIZE-1;
 					
 					// A Part for the 4 corners
-					if(board[ii][0] == Blue)
-						++blue;
-					else if(board[ii][0] == Red)
-						++red;
+					if(board[ii][0] == currentPlayer)
+						++mine;
+					else if(board[ii][0] == -currentPlayer)
+						++his;
 					
 					// C Part for the 4 corners
-					if(board[0][jj] == Blue)
-						++blue;
-					else if(board[0][jj] == Red)
-						++red;
+					if(board[0][jj] == currentPlayer)
+						++mine;
+					else if(board[0][jj] == -currentPlayer)
+						++his;
 					
 					// B Part for the 4 corners
-					if(board[ii][jj] == Blue)
-						++blue;
-					else if(board[ii][jj] == Red)
-						++red;
+					if(board[ii][jj] == currentPlayer)
+						++mine;
+					else if(board[ii][jj] == -currentPlayer)
+						++his;
 				}
-		return currentPlayer*0.125*(red-blue);
+		return mine-his;
 	}
 	
 	public double getMobilityScore(int currentPlayer)
@@ -313,18 +305,13 @@ public class Board {
 		
 		int i;
 		for(i = 0; possibleMove[i] != DUMMY_VALUE;  i += 2);
-		int blue = i/2;//(i-1+1)/2
+		int mine = i/2;//(i-1+1)/2
 		
 		getAllPossibleMove(possibleMove, Red);
 		for(i = 0; possibleMove[i] != DUMMY_VALUE;  i += 2);
-		int red = i/2;//(i-1+1)/2
+		int his = i/2;//(i-1+1)/2
 		
-		if(red == blue || blue == 0 || red == 0)
-			return 0.0;
-		else if(blue > red)
-			return currentPlayer*(double)(blue)/(blue+red);
-		else
-			return -currentPlayer*(double)(red)/(blue+red);
+		return mine-his;
 	}
 	
 	public double getFrontierDiscs(int currentPlayer)
@@ -340,23 +327,10 @@ public class Board {
 				if(board[i][j] != Empty)
 					out += POSITION_SCORE[i][j]*board[i][j];
 		
-		return currentPlayer*out/maxPositionScore;
+		return out;
 	}
 	
-	public double getIrreversiblePiece(int currentPlayer)
-	{
-		int blue = getNbIrreversiblePiece(Blue);
-		int red = getNbIrreversiblePiece(Red);
-		
-		if(blue > red)
-			return currentPlayer*(double)(blue)/(blue+red);
-		else if(red < blue)
-			return -currentPlayer*(double)(red)/(blue+red);
-		else 
-			return 0.0;
-	}
-	
-	private int getNbIrreversiblePiece(int currentPlayer)
+	public int getNbIrreversiblePiece(int currentPlayer)
 	{
 		int out = 0;
 		for(int i = 0; i < BOARD_SIZE; ++i)
@@ -364,7 +338,6 @@ public class Board {
 				if(board[i][j] == currentPlayer && isIrreversiblePiece(i, j, currentPlayer))
 					++out;
 		return out;
-		
 	}
 
 	/*
@@ -460,7 +433,6 @@ public class Board {
 				return false;
 		return false;
 	}
-
 	
 	private boolean checkIrreversiblePieceHorizontallyRight(int row, int col, int currentPlayer)
 	{
