@@ -38,21 +38,22 @@ public class Joueur extends Othello.Joueur {
 			//System.out.println("--------------------------------------------------------------");
 		}
 		
-		Move result = (Move) Compute.alphaBeta(board, depth, 1, Compute.INF, player)[1];
-		
-		if(result != null)
+		Object[] result = Compute.alphaBeta(board, depth, 1, Compute.INF, player);
+		int i = (int)result[1];
+		int j = (int)result[2];
+		if(i != Board.DUMMY_VALUE)
 		{
 			//System.out.println("Coup nous : (" + result.j + ", " + result.i + ") Player : " + player);
 			//System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~BEFORE");
 			//board.debug__Board();
-			board./*debug__*/addPiece(result.j, result.i, player);
+			board./*debug__*/addPiece(i, j, player);
 			//System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~AFTER");
 			//board.debug__Board();
 			//System.out.println("--------------------------------------------------------------");
 		}
 		
 		//stdin.nextInt();
-		return result;
+		return (i != Board.DUMMY_VALUE) ? new Move(j, i) : null;
 	}
 
 }
