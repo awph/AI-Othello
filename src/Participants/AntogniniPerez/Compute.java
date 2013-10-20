@@ -57,7 +57,7 @@ public class Compute {
 		double irreverisblePiecesOppositePlayer = root.getNbIrreversiblePiece(-currentPlayer);
 
 		//Find a better way, this sucks
-		double score;
+		double score = 0;
 		switch(depth)
 		{
 			case 0:
