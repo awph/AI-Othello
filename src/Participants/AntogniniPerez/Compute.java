@@ -19,20 +19,25 @@ public class Compute {
 		
 		int[] allPossibleMoves = new int[121];
 		root.getAllPossibleMove(allPossibleMoves, currentPlayer);
-		
-		for(int i = 0; allPossibleMoves[i] > Board.DUMMY_VALUE; i += 2)
+
+		if(allPossibleMoves[0] == Board.DUMMY_VALUE)
+			optVal = (double) alphaBeta(root, depth-1, -minOrMax, optVal, -currentPlayer)[0];
+		else
 		{
-			Board newNode = new Board(root);
-			newNode.addPiece(allPossibleMoves[i], allPossibleMoves[i+1], currentPlayer);
-			
-			double val = (double) alphaBeta(newNode, depth-1, -minOrMax, optVal, -currentPlayer)[0];
-			
-			if(val*minOrMax > optVal*minOrMax)
+			for(int i = 0; allPossibleMoves[i] > Board.DUMMY_VALUE; i += 2)
 			{
-				optVal = val;
-				optOp = new Move(allPossibleMoves[i+1], allPossibleMoves[i]);//col then row
-				if(optVal*minOrMax > parentValue*minOrMax)
-					break;
+				Board newNode = new Board(root);
+				newNode.addPiece(allPossibleMoves[i], allPossibleMoves[i+1], currentPlayer);
+				
+				double val = (double) alphaBeta(newNode, depth-1, -minOrMax, optVal, -currentPlayer)[0];
+				
+				if(val*minOrMax > optVal*minOrMax)
+				{
+					optVal = val;
+					optOp = new Move(allPossibleMoves[i+1], allPossibleMoves[i]);//col then row
+					if(optVal*minOrMax > parentValue*minOrMax)
+						break;
+				}
 			}
 		}
 		
@@ -54,6 +59,6 @@ public class Compute {
 		double irreverisblePiecesOppositePlayer = root.getNbIrreversiblePiece(-currentPlayer);
 		
 		//Find a better way, this sucks
-        return 1.5*scoreAtEndOfGameCurrentPlayer + 2.5*(positionScoreCurrentPlayer-positionScoreOppositePlayer) + 4.5*mobilityScoreCurrentPlayer*10/mobilityScoreOppositePlayer + 5*(irreverisblePiecesCurrentPlayer-irreverisblePiecesOppositePlayer);
+        return 1.5*scoreAtEndOfGameCurrentPlayer + 2.5*(positionScoreCurrentPlayer-positionScoreOppositePlayer) + 4.5*mobilityScoreCurrentPlayer*(10-mobilityScoreOppositePlayer) + 5*(irreverisblePiecesCurrentPlayer-irreverisblePiecesOppositePlayer);
 	}
 }
