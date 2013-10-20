@@ -50,6 +50,7 @@ public class Joueur extends Othello.Joueur {
 			//System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~AFTER");
 			//board.debug__Board();
 			//System.out.println("--------------------------------------------------------------");
+			System.out.println(player + " " + result[0]);
 		}
 		
 		//stdin.nextInt();

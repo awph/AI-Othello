@@ -27,56 +27,11 @@ public class Board {
 		{99,   -8,    8,    6,    6,    8,   -8,    99}
 		};
 	
-	
 	private int[][] board;//Row major
-	
-	public void debug__Board()
-	{
-		for(int[] b : board)
-		{
-			for(int bb : b)
-				System.out.print(bb + "\t");
-			System.out.println();
-		}
-	}
-	
-    //Debug a state
-    public Board(boolean debug)
-    {
-            board = new int[][]
-                            {
-                            {1, 1, 1, 1, 1, 0, 0, 0},
-                            {1, 1, 1, 1, 1, 1, 0, 0},
-                            {1, -1, 1, -1, 0, 0, 0, 0},
-                            {1, -1, 0, -1, -1, 0, 0, 0},
-                            {1, -1, 1, -1, -1, 0, 0, 0},
-                            {1, 1, 0, -1, 0, -1, 0, 0},
-                            {1, 0, -1, -1, 0, 0, 0, 0},
-                            {0, 0, 0, -1, 0, 0, 0, 0}
-                            };
-            debug__Board();
-            int[] possiblesMoves = new int[121];
-            getAllPossibleMove(possiblesMoves, -1);
-            for(int i : possiblesMoves)
-                    System.out.print(i + ", ");
-    }
-	
-	public void debug__addPiece(int row, int col, int currentPlayer)
-	{
-		System.out.println("Player : " + currentPlayer);
-		System.out.println("Row : " + row + " Col : " + col);
-		System.out.println(checkHorizontallyLeft2Right(row, col, currentPlayer)); 
-		System.out.println(checkHorizontallyRight2Left(row, col, currentPlayer)); 
-		System.out.println(checkVerticallyTop2Bottom(row, col, currentPlayer)); 
-		System.out.println(checkVerticallyBottom2Top(row, col, currentPlayer));
-		System.out.println(checkDiagonallyBottomLeft2TopRight(row, col, currentPlayer));
-		System.out.println(checkDiagonallyBottomRight2TopLeft(row, col, currentPlayer));
-		System.out.println(checkDiagonallyTopRight2BottomLeft(row, col, currentPlayer));
-		System.out.println(checkDiagonallyTopLeft2BottomRight(row, col, currentPlayer));
-		
-		addPiece(row, col, currentPlayer);
-	}
-	
+	private int oldPlayer;	
+	private int maxPositionScore;
+	private boolean hasAPlayerPassed;
+	private int ithMove;
 	public Board()
 	{
 		board = new int[BOARD_SIZE][BOARD_SIZE];
@@ -85,8 +40,7 @@ public class Board {
 	
 	public Board(Board board)
 	{
-		//Don't need the init
-		this.board = new int[BOARD_SIZE][BOARD_SIZE];
+		this();
 		for(int i = 0; i < BOARD_SIZE; ++i)
 			for(int j = 0; j < BOARD_SIZE; ++j)
 				this.board[i][j] = board.board[i][j];
@@ -101,11 +55,25 @@ public class Board {
 		board[BOARD_SIZE/2][BOARD_SIZE/2] = Blue;
 		board[BOARD_SIZE/2-1][BOARD_SIZE/2] = Red;
 		board[BOARD_SIZE/2][BOARD_SIZE/2-1] = Red;
+		
+		oldPlayer = Blue;
+		hasAPlayerPassed = false;
+		maxPositionScore = 0;
+
+		for(int i = 0; i < BOARD_SIZE/2; ++i)
+			for(int j = 0; j < BOARD_SIZE/2; ++j)
+				maxPositionScore += POSITION_SCORE[i][j];
 	}
 	
 	//We suppose that we always receive a valid move via the method getAllPossibleMove
 	public void addPiece(int row, int col, int currentPlayer)
 	{
+		++ithMove;
+		if(oldPlayer == currentPlayer)
+			hasAPlayerPassed = !hasAPlayerPassed;
+		
+		oldPlayer = currentPlayer;
+		
 		board[row][col] = currentPlayer;
 		
 		if(checkHorizontallyLeft2Right(row, col, currentPlayer))
@@ -133,6 +101,10 @@ public class Board {
 			actionDiagonallyTopLeft2BottomRight(row, col, currentPlayer);
 	}
 	
+	public int getIthMove()
+	{
+		return ithMove;
+	}
 	/*
 	 *========================================================*
 	 *					COMPUTATIONAL PART
@@ -255,7 +227,12 @@ public class Board {
 	 *========================================================*
 	 */
 	
-	public double getPieceDifference()
+	public boolean getParity(int currentPlayer)
+	{
+		return (hasAPlayerPassed && currentPlayer == Blue || !hasAPlayerPassed && currentPlayer == Red);
+	}
+	
+	public double getPieceDifference(int currentPlayer)
 	{
 		int red = 0, blue = 0;
 		for(int i = 0; i < BOARD_SIZE; ++i)
@@ -268,25 +245,26 @@ public class Board {
 		if(red == blue)
 			return 0;
 		else if(blue > red)
-			return 100.0*blue/(blue+red);
+			return currentPlayer*(double)(blue)/(blue+red);
 		else
-			return -100.0*red/(blue+red);
+			return -currentPlayer*(double)(red)/(blue+red);
 	}
 	
-	public double getCornerOccupacy()
+	public double getCornerOccupacy(int currentPlayer)
 	{
 		int blue = 0, red = 0;
 		
 		for(int i = 0; i <= 1; ++i)
 			for(int j = 0; j <= 1; ++j)
-				if(board[i*(BOARD_SIZE-1)][j*(BOARD_SIZE-1)] == blue)
+				if(board[i*(BOARD_SIZE-1)][j*(BOARD_SIZE-1)] == Blue)
 					++blue;
-				else
+				else if(board[i*(BOARD_SIZE-1)][j*(BOARD_SIZE-1)] == Red)
 					++red;
-		return 25.0*blue-25.0*red;
+		
+		return currentPlayer*0.25*(blue-red);
 	}
 	
-	public double getCornerCloseness()
+	public double getCornerCloseness(int currentPlayer)
 	{
 		int blue = 0, red = 0;
 		
@@ -299,7 +277,6 @@ public class Board {
 					 * A B
 					 */
 					
-					// A Part for the 4 corners
 					int ii = (-2)*i+1;
 					if(ii == -1)
 						ii += BOARD_SIZE-1;
@@ -308,27 +285,28 @@ public class Board {
 					if(jj == -1)
 						jj += BOARD_SIZE-1;
 					
-					if(board[ii][0] == blue)
+					// A Part for the 4 corners
+					if(board[ii][0] == Blue)
 						++blue;
-					else if(board[ii][0] == red)
+					else if(board[ii][0] == Red)
 						++red;
 					
 					// C Part for the 4 corners
-					if(board[0][jj] == blue)
+					if(board[0][jj] == Blue)
 						++blue;
-					else if(board[0][jj] == red)
+					else if(board[0][jj] == Red)
 						++red;
 					
 					// B Part for the 4 corners
-					if(board[ii][jj] == blue)
+					if(board[ii][jj] == Blue)
 						++blue;
-					else if(board[ii][jj] == red)
+					else if(board[ii][jj] == Red)
 						++red;
 				}
-		return -12.5*blue+12.5*red;
+		return currentPlayer*0.125*(red-blue);
 	}
 	
-	public double getMobilityScore()
+	public double getMobilityScore(int currentPlayer)
 	{
 		int[] possibleMove = new int[121];
 		getAllPossibleMove(possibleMove, Blue);
@@ -344,40 +322,41 @@ public class Board {
 		if(red == blue || blue == 0 || red == 0)
 			return 0.0;
 		else if(blue > red)
-			return 100.0*blue/(blue+red);
+			return currentPlayer*(double)(blue)/(blue+red);
 		else
-			return -100.0*red/(blue+red);
+			return -currentPlayer*(double)(red)/(blue+red);
 	}
 	
-	public double getFrontierDiscs()
+	public double getFrontierDiscs(int currentPlayer)
 	{
 		return 0;
 	}
 	
-	private static final int[][] POSITION_SCORE2 = 
-		{
-		{20,   -3,    11,    8,    8,    11,   -3,    20},
-		{-3,   -7,   -4,  1,   1,   -4,  -7,    -3},    
-		{ 11,     -4,    2,    2,    2,    2,    -4,    11},    
-		{ 8,    1,    2,    -3,    -3,    2,   1,    8},    
-		{ 8,    1,    2,    -3,    -3,    2,   1,    8},    
-		{ 11,     -4,    2,    2,    2,    2,    -4,    11},       
-		{-3,   -7,   -4,  1,   1,   -4,  -7,    -3},  
-		{20,   -3,    11,    8,    8,    11,   -3,    20}
-		};
-	public double getDiscSquares()
-	{
+	public double getDiscSquares(int currentPlayer)
+	{		
 		double out = 0;
 		for(int i = 0; i < BOARD_SIZE; ++i)
 			for(int j = 0; j < BOARD_SIZE; ++j)
 				if(board[i][j] != Empty)
-					out += POSITION_SCORE2[i][j]*board[i][j];
-		return out;
+					out += POSITION_SCORE[i][j]*board[i][j];
+		
+		return currentPlayer*out/maxPositionScore;
 	}
-	/*
-	 * Return the number of irreverisble pieces
-	 */
-	/*public int getNbIrreversiblePiece(int currentPlayer)
+	
+	public double getIrreversiblePiece(int currentPlayer)
+	{
+		int blue = getNbIrreversiblePiece(Blue);
+		int red = getNbIrreversiblePiece(Red);
+		
+		if(blue > red)
+			return currentPlayer*(double)(blue)/(blue+red);
+		else if(red < blue)
+			return -currentPlayer*(double)(red)/(blue+red);
+		else 
+			return 0.0;
+	}
+	
+	private int getNbIrreversiblePiece(int currentPlayer)
 	{
 		int out = 0;
 		for(int i = 0; i < BOARD_SIZE; ++i)
@@ -386,58 +365,8 @@ public class Board {
 					++out;
 		return out;
 		
-	}*/
-	/*
-	 * Return the number of possibilites that has the currentPlayer to play with this state of the game
-	 */
-	/*public int getMobilityScore(int currentPlayer)
-	{
-		int[] possibleMove = new int[121];
-		getAllPossibleMove(possibleMove, currentPlayer);
-		
-		int i;
-		for(i = 0; possibleMove[i] != DUMMY_VALUE;  i += 2);
-		return i/2;//(i-1+1)/2
-	}*/
-	
-	/*
-	 * Return a score related with the position of the currentPlayer's pieces with the position matrix
-	 */
-	/*public int getPositionScore(int currentPlayer)
-	{
-		int out = 0;
-		for(int i = 0; i < BOARD_SIZE; ++i)
-			for(int j = 0; j < BOARD_SIZE; ++j)
-				if(board[i][j] == currentPlayer)
-					out += POSITION_SCORE[i][j];
-		return out;
-	}*/
-	
-	/*
-	 * Return a score that count the number of currentPlayer's piece, with the empty cases if he wins
-	 */
-	/*public int getScoreAtEndOfGame(int currentPlayer)
-	{
-		int current = 0, opposite = 0, empty = 0;
-		int oppositePlayer = -currentPlayer;
-		
-		for(int i = 0; i < BOARD_SIZE; ++i)
-			for(int j = 0; j < BOARD_SIZE; ++j)
-				if(board[i][j] == currentPlayer)
-					++current;
-				else if(board[i][j] == oppositePlayer)
-					++opposite;
-				else
-					++empty;
-		
-		if(current > opposite)
-			return current+empty;
-		else if(current < opposite)
-			return opposite+empty;
-		else
-			return current; //We do nothing special if there is the same number of piece blue & red and some empty cases	
-	}*/
-	
+	}
+
 	/*
 	 *========================================================*
 	 *						CHECK PART

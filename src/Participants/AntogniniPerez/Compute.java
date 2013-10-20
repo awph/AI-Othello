@@ -44,19 +44,15 @@ public class Compute {
 	
 	private static double eval(Board root, int currentPlayer,int depth) 
 	{
-		/*double scoreAtEndOfGameCurrentPlayer = root.getScoreAtEndOfGame(currentPlayer);
-		//double scoreAtEndOfGameOppositePlayer = 64 - scoreAtEndOfGameCurrentPlayer;
-		
-		double positionScoreCurrentPlayer = root.getPositionScore(currentPlayer);
-		double positionScoreOppositePlayer = root.getPositionScore(-currentPlayer);
-		
-		double mobilityScoreCurrentPlayer = root.getMobilityScore(currentPlayer);
-		double mobilityScoreOppositePlayer = root.getMobilityScore(-currentPlayer);
-		
-		double irreverisblePiecesCurrentPlayer = root.getNbIrreversiblePiece(currentPlayer);
-		double irreverisblePiecesOppositePlayer = root.getNbIrreversiblePiece(-currentPlayer);
-*/
-		//Find a better way, this sucks
+		//[-1;1] f(t) -> 1 -> Good
+		double scorePieceDifference = root.getPieceDifference(currentPlayer);
+		double scoreCornerOccupacy = root.getCornerOccupacy(currentPlayer);
+		double scoreCornerCloseness = root.getCornerCloseness(currentPlayer);
+		double scoreMobilityScore = root.getMobilityScore(currentPlayer);
+		double scoreFrontierDiscs = root.getFrontierDiscs(currentPlayer);
+		double scoreDiscSquare = root.getDiscSquares(currentPlayer);
+		double scoreIrreversiblePiece = root.getIrreversiblePiece(currentPlayer);//€N
+		double scoreParity = (root.getParity(currentPlayer) ? 1 : 0);//Bool
 		double score = 0;
 		switch(depth)
 		{
@@ -70,9 +66,26 @@ public class Compute {
 			case 7:
 			case 8:
 			case 9:
-				score = 10.0 * root.getPieceDifference() + 801.724*root.getCornerOccupacy() + 382.026*root.getCornerCloseness() + 78.922*root.getMobilityScore() + 74.396*root.getFrontierDiscs() + 10.0*root.getDiscSquares();
+				score =   1.0 * scorePieceDifference
+						+ 1.0 * scoreCornerOccupacy
+						+ 1.0 * scoreCornerCloseness
+						+ 1.0 * scoreMobilityScore
+						+ 1.0 * scoreFrontierDiscs
+						+ 1.0 * scoreDiscSquare
+						+ 1.0 * scoreIrreversiblePiece
+						+ 1.0 * scoreParity;
 			break;
 		}
+		
+		/*System.out.println("Player " + currentPlayer);
+		System.out.println("PD " + scorePieceDifference);
+		System.out.println("CO " + scoreCornerOccupacy);
+		System.out.println("CC " + scoreCornerCloseness);
+		System.out.println("MS " + scoreMobilityScore);
+		System.out.println("FD " + scoreFrontierDiscs);
+		System.out.println("DS " + scoreDiscSquare);
+		System.out.println("IP " + scoreIrreversiblePiece);
+		System.out.println("P " + scoreParity);*/
 		
 		return score;
 		}
