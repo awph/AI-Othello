@@ -44,7 +44,7 @@ public class Compute {
 	
 	private static double eval(Board root, int currentPlayer,int depth) 
 	{
-		double scoreAtEndOfGameCurrentPlayer = root.getScoreAtEndOfGame(currentPlayer);
+		/*double scoreAtEndOfGameCurrentPlayer = root.getScoreAtEndOfGame(currentPlayer);
 		//double scoreAtEndOfGameOppositePlayer = 64 - scoreAtEndOfGameCurrentPlayer;
 		
 		double positionScoreCurrentPlayer = root.getPositionScore(currentPlayer);
@@ -55,7 +55,7 @@ public class Compute {
 		
 		double irreverisblePiecesCurrentPlayer = root.getNbIrreversiblePiece(currentPlayer);
 		double irreverisblePiecesOppositePlayer = root.getNbIrreversiblePiece(-currentPlayer);
-
+*/
 		//Find a better way, this sucks
 		double score = 0;
 		switch(depth)
@@ -70,7 +70,7 @@ public class Compute {
 			case 7:
 			case 8:
 			case 9:
-				score = 1.5*scoreAtEndOfGameCurrentPlayer + 2.5*(positionScoreCurrentPlayer-positionScoreOppositePlayer) + 4.5*mobilityScoreCurrentPlayer*(10-mobilityScoreOppositePlayer) + 5*(irreverisblePiecesCurrentPlayer-irreverisblePiecesOppositePlayer);
+				score = 10.0 * root.getPieceDifference() + 801.724*root.getCornerOccupacy() + 382.026*root.getCornerCloseness() + 78.922*root.getMobilityScore() + 74.396*root.getFrontierDiscs() + 10.0*root.getDiscSquares();
 			break;
 		}
 		

@@ -255,10 +255,129 @@ public class Board {
 	 *========================================================*
 	 */
 	
+	public double getPieceDifference()
+	{
+		int red = 0, blue = 0;
+		for(int i = 0; i < BOARD_SIZE; ++i)
+			for(int j = 0; j < BOARD_SIZE; ++j)
+				if(board[i][j] == Blue)
+					++blue;
+				else if(board[i][j] == Red)
+					++red;
+		
+		if(red == blue)
+			return 0;
+		else if(blue > red)
+			return 100.0*blue/(blue+red);
+		else
+			return -100.0*red/(blue+red);
+	}
+	
+	public double getCornerOccupacy()
+	{
+		int blue = 0, red = 0;
+		
+		for(int i = 0; i <= 1; ++i)
+			for(int j = 0; j <= 1; ++j)
+				if(board[i*(BOARD_SIZE-1)][j*(BOARD_SIZE-1)] == blue)
+					++blue;
+				else
+					++red;
+		return 25.0*blue-25.0*red;
+	}
+	
+	public double getCornerCloseness()
+	{
+		int blue = 0, red = 0;
+		
+		for(int i = 0; i <= 1; ++i)
+			for(int j = 0; j <= 1; ++j)
+				if(board[i*(BOARD_SIZE-1)][j*(BOARD_SIZE-1)] == Empty)
+				{
+					/*
+					 * X C
+					 * A B
+					 */
+					
+					// A Part for the 4 corners
+					int ii = (-2)*i+1;
+					if(ii == -1)
+						ii += BOARD_SIZE-1;
+					
+					int jj = (-2)*j+1;
+					if(jj == -1)
+						jj += BOARD_SIZE-1;
+					
+					if(board[ii][0] == blue)
+						++blue;
+					else if(board[ii][0] == red)
+						++red;
+					
+					// C Part for the 4 corners
+					if(board[0][jj] == blue)
+						++blue;
+					else if(board[0][jj] == red)
+						++red;
+					
+					// B Part for the 4 corners
+					if(board[ii][jj] == blue)
+						++blue;
+					else if(board[ii][jj] == red)
+						++red;
+				}
+		return -12.5*blue+12.5*red;
+	}
+	
+	public double getMobilityScore()
+	{
+		int[] possibleMove = new int[121];
+		getAllPossibleMove(possibleMove, Blue);
+		
+		int i;
+		for(i = 0; possibleMove[i] != DUMMY_VALUE;  i += 2);
+		int blue = i/2;//(i-1+1)/2
+		
+		getAllPossibleMove(possibleMove, Red);
+		for(i = 0; possibleMove[i] != DUMMY_VALUE;  i += 2);
+		int red = i/2;//(i-1+1)/2
+		
+		if(red == blue || blue == 0 || red == 0)
+			return 0.0;
+		else if(blue > red)
+			return 100.0*blue/(blue+red);
+		else
+			return -100.0*red/(blue+red);
+	}
+	
+	public double getFrontierDiscs()
+	{
+		return 0;
+	}
+	
+	private static final int[][] POSITION_SCORE2 = 
+		{
+		{20,   -3,    11,    8,    8,    11,   -3,    20},
+		{-3,   -7,   -4,  1,   1,   -4,  -7,    -3},    
+		{ 11,     -4,    2,    2,    2,    2,    -4,    11},    
+		{ 8,    1,    2,    -3,    -3,    2,   1,    8},    
+		{ 8,    1,    2,    -3,    -3,    2,   1,    8},    
+		{ 11,     -4,    2,    2,    2,    2,    -4,    11},       
+		{-3,   -7,   -4,  1,   1,   -4,  -7,    -3},  
+		{20,   -3,    11,    8,    8,    11,   -3,    20}
+		};
+	public double getDiscSquares()
+	{
+		double out = 0;
+		for(int i = 0; i < BOARD_SIZE; ++i)
+			for(int j = 0; j < BOARD_SIZE; ++j)
+				if(board[i][j] != Empty)
+					out += POSITION_SCORE2[i][j]*board[i][j];
+		return out;
+	}
 	/*
 	 * Return the number of irreverisble pieces
 	 */
-	public int getNbIrreversiblePiece(int currentPlayer)
+	/*public int getNbIrreversiblePiece(int currentPlayer)
 	{
 		int out = 0;
 		for(int i = 0; i < BOARD_SIZE; ++i)
@@ -267,11 +386,11 @@ public class Board {
 					++out;
 		return out;
 		
-	}
+	}*/
 	/*
 	 * Return the number of possibilites that has the currentPlayer to play with this state of the game
 	 */
-	public int getMobilityScore(int currentPlayer)
+	/*public int getMobilityScore(int currentPlayer)
 	{
 		int[] possibleMove = new int[121];
 		getAllPossibleMove(possibleMove, currentPlayer);
@@ -279,12 +398,12 @@ public class Board {
 		int i;
 		for(i = 0; possibleMove[i] != DUMMY_VALUE;  i += 2);
 		return i/2;//(i-1+1)/2
-	}
+	}*/
 	
 	/*
 	 * Return a score related with the position of the currentPlayer's pieces with the position matrix
 	 */
-	public int getPositionScore(int currentPlayer)
+	/*public int getPositionScore(int currentPlayer)
 	{
 		int out = 0;
 		for(int i = 0; i < BOARD_SIZE; ++i)
@@ -292,12 +411,12 @@ public class Board {
 				if(board[i][j] == currentPlayer)
 					out += POSITION_SCORE[i][j];
 		return out;
-	}
+	}*/
 	
 	/*
 	 * Return a score that count the number of currentPlayer's piece, with the empty cases if he wins
 	 */
-	public int getScoreAtEndOfGame(int currentPlayer)
+	/*public int getScoreAtEndOfGame(int currentPlayer)
 	{
 		int current = 0, opposite = 0, empty = 0;
 		int oppositePlayer = -currentPlayer;
@@ -317,7 +436,7 @@ public class Board {
 			return opposite+empty;
 		else
 			return current; //We do nothing special if there is the same number of piece blue & red and some empty cases	
-	}
+	}*/
 	
 	/*
 	 *========================================================*
