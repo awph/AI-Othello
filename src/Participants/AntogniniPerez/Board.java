@@ -333,13 +333,13 @@ public class Board {
 	public double getMobilityScore(int currentPlayer)
 	{
 		int[] possibleMove = new int[121];
-		getAllPossibleMove(possibleMove, Blue);
+		getAllPossibleMove(possibleMove, currentPlayer);
 		
 		int i;
 		for(i = 0; possibleMove[i] != DUMMY_VALUE;  i += 2);
 		int mine = i/2;//(i-1+1)/2
 		
-		getAllPossibleMove(possibleMove, Red);
+		getAllPossibleMove(possibleMove, -currentPlayer);
 		for(i = 0; possibleMove[i] != DUMMY_VALUE;  i += 2);
 		int his = i/2;//(i-1+1)/2
 		
