@@ -4,12 +4,36 @@ public class Compute {
 
 	public static final double INF = Integer.MAX_VALUE;
 	
-	//Maximize -> minOrMax = 1, otherwhise -1 (minimize)
-	//Object[] -> [0] -> Score, [1] -> Move.j, [2] -> Move.i
-	public static Object[] alphaBeta(Board root, int depth, int minOrMax, double parentValue, int currentPlayer)
+	private int I;
+	private int J;
+	
+	public Compute()
 	{
-		if(depth == 0 || root.isTheGameEnded())
-			return new Object[] { eval(root, currentPlayer, depth), Board.DUMMY_VALUE, Board.DUMMY_VALUE };
+		initialize();
+	}
+	
+	public void initialize()
+	{
+		I = J = Board.DUMMY_VALUE;
+	}
+	
+	public int getI()
+	{
+		return I;
+	}
+	
+	public int getJ()
+	{
+		return J;
+	}
+	
+	//Maximize -> minOrMax = 1, otherwhise -1 (minimize)
+	//Return score
+	public double alphaBeta(Board root, int depth, int minOrMax, double parentValue, int currentPlayer)
+	{
+		boolean isEndOfGame = root.isTheGameEnded();
+		if(depth == 0 || isEndOfGame)
+			return eval(root, currentPlayer, depth, isEndOfGame);
 		
 		double optVal = minOrMax * -INF;
 		int optOpi = Board.DUMMY_VALUE, optOpj = Board.DUMMY_VALUE;
@@ -18,7 +42,7 @@ public class Compute {
 		root.getAllPossibleMove(allPossibleMoves, currentPlayer);
 
 		if(allPossibleMoves[0] == Board.DUMMY_VALUE)
-			optVal = (double) alphaBeta(root, depth-1, -minOrMax, optVal, -currentPlayer)[0];
+			optVal = alphaBeta(root, depth-1, -minOrMax, optVal, -currentPlayer);
 		else
 		{
 			for(int i = 0; allPossibleMoves[i] > Board.DUMMY_VALUE; i += 2)
@@ -26,7 +50,7 @@ public class Compute {
 				Board newNode = new Board(root);
 				newNode.addPiece(allPossibleMoves[i], allPossibleMoves[i+1], currentPlayer);
 				
-				double val = (double) alphaBeta(newNode, depth-1, -minOrMax, optVal, -currentPlayer)[0];
+				double val = alphaBeta(newNode, depth-1, -minOrMax, optVal, -currentPlayer);
 				
 				if(val*minOrMax > optVal*minOrMax)
 				{
@@ -38,57 +62,14 @@ public class Compute {
 				}
 			}
 		}
-		
-		return new Object[] {optVal, optOpi, optOpj};
+		I = optOpi;
+		J = optOpj;
+		return optVal;
 	}
 	
-	private static double eval(Board root, int currentPlayer,int depth) 
+	private static double eval(Board root, int currentPlayer,int depth, boolean isEndOfGame) 
 	{
-		double scorePieceDifference = root.getPieceDifference(currentPlayer);
-		double scoreCornerOccupacy = root.getCornerOccupacy(currentPlayer);
-		double scoreCornerCloseness = root.getCornerCloseness(currentPlayer);
-		double scoreMobilityScore = root.getMobilityScore(currentPlayer);
-		double scoreFrontierDiscs = root.getFrontierDiscs(currentPlayer);
-		double scoreDiscSquare = root.getDiscSquares(currentPlayer);
-		double scoreIrreversiblePiece = root.getNbIrreversiblePiece(currentPlayer);
-		double scoreParity = root.getParity(currentPlayer);
-		double scoreBoardPiece = root.getBoardPiece(currentPlayer);
-		
-		double score = 0;
-		switch(depth)
-		{
-			case 0:
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-			case 5:
-			case 6:
-			case 7:
-			case 8:
-			case 9:
-				score =   1.0 * scorePieceDifference
-						+ 1.0 * scoreCornerOccupacy
-						+ 1.0 * scoreCornerCloseness
-						+ 1.0 * scoreMobilityScore
-						+ 1.0 * scoreFrontierDiscs
-						+ 1.0 * scoreDiscSquare
-						+ 1.0 * scoreIrreversiblePiece
-						+ 1.0 * scoreParity
-						+ 1.0 * scoreBoardPiece;
-			break;
-		}
-		
-		/*System.out.println("Player " + currentPlayer);
-		System.out.println("PD " + scorePieceDifference);
-		System.out.println("CO " + scoreCornerOccupacy);
-		System.out.println("CC " + scoreCornerCloseness);
-		System.out.println("MS " + scoreMobilityScore);
-		System.out.println("FD " + scoreFrontierDiscs);
-		System.out.println("DS " + scoreDiscSquare);
-		System.out.println("IP " + scoreIrreversiblePiece);
-		System.out.println("P " + scoreParity);*/
-		
-		return score;
-		}
+		//TODO
+		return 0.0;
+	}
 }
