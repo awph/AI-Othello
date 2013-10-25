@@ -19,13 +19,14 @@ public class Board {
 		{
 		{99,   -8,    8,    6,    6,    8,   -8,    99},
 		{-8,   -24,   -4,  -3,   -3,   -4,  -24,    -8},    
-		{ 8,     6,    7,    4,    4,    7,    6,    8},    
+		{ 8,     -4,    7,    4,    4,    7,    -4,    8},    
 		{ 6,    -3,    4,    0,    0,    4,   -3,    6},    
 		{ 6,    -3,    4,    0,    0,    4,   -3,    6},    
-		{ 8,     6,    7,    4,    4,    7,    6,    8},    
+		{ 8,     -4,    7,    4,    4,    7,    -4,    8},    
 		{-8,   -24,   -4,  -3,   -3,   -4,  -24,    -8},    
 		{99,   -8,    8,    6,    6,    8,   -8,    99}
 		};
+	private final static double MAX_SCORE = 4.0*142.0;
 	
 	private int[][] board;//Row major
 	private int oldPlayer;	
@@ -224,9 +225,9 @@ public class Board {
 	 *========================================================*
 	 */
 	
-	public boolean getParity(int currentPlayer)
+	public double getParity(int currentPlayer)
 	{
-		return (hasAPlayerPassed && currentPlayer == Blue || !hasAPlayerPassed && currentPlayer == Red);
+		return (hasAPlayerPassed && currentPlayer == Blue || !hasAPlayerPassed && currentPlayer == Red) ? 1.0 : 0.0;
 	}
 	
 	public double getPieceDifference(int currentPlayer)
@@ -239,7 +240,7 @@ public class Board {
 				else if(board[i][j] == -currentPlayer)
 					++his;
 		
-		return mine-his;
+		return (mine-his)/64.0;
 	}
 	
 	public double getCornerOccupacy(int currentPlayer)
@@ -253,7 +254,7 @@ public class Board {
 				else if(board[i*(BOARD_SIZE-1)][j*(BOARD_SIZE-1)] == -currentPlayer)
 					++his;
 		
-		return mine-his;
+		return (mine-his)/4.0;
 	}
 	
 	public double getCornerCloseness(int currentPlayer)
@@ -295,9 +296,40 @@ public class Board {
 					else if(board[ii][jj] == -currentPlayer)
 						++his;
 				}
-		return mine-his;
+		return (mine-his)/12.0;
 	}
 	
+	public double getBoardPiece(int currentPlayer)
+	{
+		int mine=0;
+		int his = 0;
+		
+		for(int j = 2; j <= 5; ++j)
+			if(board[0][j] == currentPlayer)
+				++mine;
+			else if(board[0][j] == -currentPlayer);
+				++his;
+		
+		for(int j = 2; j <= 5; ++j)
+			if(board[BOARD_SIZE-1][j] == currentPlayer)
+				++mine;
+			else if(board[BOARD_SIZE-1][j] == -currentPlayer);
+				++his;
+				
+		for(int i = 2; i <= 5; ++i)
+			if(board[i][0] == currentPlayer)
+				++mine;
+			else if(board[i][0] == -currentPlayer);
+				++his;
+		
+		for(int i = 2; i <= 5; ++i)
+			if(board[i][BOARD_SIZE-1] == currentPlayer)
+				++mine;
+			else if(board[i][BOARD_SIZE-1] == -currentPlayer);
+				++his;
+				
+		return (mine-his)/16.0;
+	}
 	public double getMobilityScore(int currentPlayer)
 	{
 		int[] possibleMove = new int[121];
@@ -311,7 +343,7 @@ public class Board {
 		for(i = 0; possibleMove[i] != DUMMY_VALUE;  i += 2);
 		int his = i/2;//(i-1+1)/2
 		
-		return mine-his;
+		return (mine-his)/20.0;
 	}
 	
 	public double getFrontierDiscs(int currentPlayer)
@@ -327,17 +359,17 @@ public class Board {
 				if(board[i][j] != Empty)
 					out += POSITION_SCORE[i][j]*board[i][j];
 		
-		return out;
+		return currentPlayer*out/MAX_SCORE;
 	}
 	
-	public int getNbIrreversiblePiece(int currentPlayer)
+	public double getNbIrreversiblePiece(int currentPlayer)
 	{
 		int out = 0;
 		for(int i = 0; i < BOARD_SIZE; ++i)
 			for(int j = 0; j < BOARD_SIZE; ++j)
 				if(board[i][j] == currentPlayer && isIrreversiblePiece(i, j, currentPlayer))
 					++out;
-		return out;
+		return out/64.0;
 	}
 
 	/*
