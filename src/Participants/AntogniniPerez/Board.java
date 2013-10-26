@@ -260,7 +260,6 @@ public class Board {
 	{
 		int mine = 0, his = 0;
 		
-		board[0][0] = board[7][0] = board[7][0] = board[7][7] = Empty;
 		for(int i = 0; i <= 1; ++i)
 			for(int j = 0; j <= 1; ++j)
 				if(board[i*(BOARD_SIZE-1)][j*(BOARD_SIZE-1)] == Empty)
