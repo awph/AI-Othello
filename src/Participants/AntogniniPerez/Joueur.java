@@ -32,7 +32,6 @@ public class Joueur extends Othello.Joueur {
 		
 		if(i != Board.DUMMY_VALUE)
 			board.addPiece(i, j, player);
-		
 
 		return (i != Board.DUMMY_VALUE) ? new Move(j, i) : null;
 	}

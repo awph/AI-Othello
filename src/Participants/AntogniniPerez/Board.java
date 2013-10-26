@@ -260,6 +260,7 @@ public class Board {
 	{
 		int mine = 0, his = 0;
 		
+		board[0][0] = board[7][0] = board[7][0] = board[7][7] = Empty;
 		for(int i = 0; i <= 1; ++i)
 			for(int j = 0; j <= 1; ++j)
 				if(board[i*(BOARD_SIZE-1)][j*(BOARD_SIZE-1)] == Empty)
@@ -269,30 +270,28 @@ public class Board {
 					 * A B
 					 */
 					
-					int ii = (-2)*i+1;
-					if(ii == -1)
-						ii += BOARD_SIZE-1;
+					int i1 = i*(BOARD_SIZE-1);
+					int j1 = j*(BOARD_SIZE-1);
 					
-					int jj = (-2)*j+1;
-					if(jj == -1)
-						jj += BOARD_SIZE-1;
-					
+					int i2 = (-2)*i+1;
+					int j2 = (-2)*j+1;
+
 					// A Part for the 4 corners
-					if(board[ii][0] == currentPlayer)
+					if(board[i1+i2][j1] == currentPlayer)
 						++mine;
-					else if(board[ii][0] == -currentPlayer)
+					else if(board[i1+i2][j1] == -currentPlayer)
 						++his;
 					
 					// C Part for the 4 corners
-					if(board[0][jj] == currentPlayer)
+					if(board[i1][j1+j2] == currentPlayer)
 						++mine;
-					else if(board[0][jj] == -currentPlayer)
+					else if(board[i1][j1+j2] == -currentPlayer)
 						++his;
 					
 					// B Part for the 4 corners
-					if(board[ii][jj] == currentPlayer)
+					if(board[i1+i2][j1+j2] == currentPlayer)
 						++mine;
-					else if(board[ii][jj] == -currentPlayer)
+					else if(board[i1+i2][j1+j2] == -currentPlayer)
 						++his;
 				}
 		return his-mine;
@@ -303,32 +302,25 @@ public class Board {
 		int mine=0;
 		int his = 0;
 		
-		for(int j = 2; j <= 5; ++j)
-			if(board[0][j] == currentPlayer)
-				++mine;
-			else if(board[0][j] == -currentPlayer);
-				++his;
-		
-		for(int j = 2; j <= 5; ++j)
-			if(board[BOARD_SIZE-1][j] == currentPlayer)
-				++mine;
-			else if(board[BOARD_SIZE-1][j] == -currentPlayer);
-				++his;
-				
-		for(int i = 2; i <= 5; ++i)
-			if(board[i][0] == currentPlayer)
-				++mine;
-			else if(board[i][0] == -currentPlayer);
-				++his;
-		
-		for(int i = 2; i <= 5; ++i)
-			if(board[i][BOARD_SIZE-1] == currentPlayer)
-				++mine;
-			else if(board[i][BOARD_SIZE-1] == -currentPlayer);
-				++his;
-				
+		for(int j = 0; j <= 1; j++)
+			for(int i = 2; i <= 5; ++i)	
+			{
+				//Vertical
+				if(board[i][j*(BOARD_SIZE-1)] == currentPlayer)
+					++mine;
+				else if(board[i][j*(BOARD_SIZE-1)] == -currentPlayer);
+					++his;
+					
+				//Horizontal
+				if(board[j*(BOARD_SIZE-1)][i] == currentPlayer)
+					++mine;
+				else if(board[j*(BOARD_SIZE-1)][i]  == -currentPlayer);
+					++his;
+			}
+			
 		return mine-his;
 	}
+	
 	public double getMobilityScore(int currentPlayer)
 	{
 		int[] possibleMove = new int[121];
@@ -352,10 +344,11 @@ public class Board {
 		
 		for(int i = 1; i < BOARD_SIZE-1; ++i)
 			for(int j = 1; j < BOARD_SIZE-1; ++j)
-				if(board[i][j] == currentPlayer && isFrontierDisc(i, j))
-					++mine;
-				else if(board[i][j] == -currentPlayer && isFrontierDisc(i, j))
-					++his;
+				if(board[i][j] != Empty && isFrontierDisc(i, j))
+					if(board[i][j] == currentPlayer)
+						++mine;
+					else if(board[i][j] == -currentPlayer)
+						++his;
 		
 		return his-mine;
 	}
