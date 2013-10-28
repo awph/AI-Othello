@@ -21,7 +21,6 @@ public class Joueur extends Othello.Joueur {
 
 	public Move nextPlay(Move move) 
 	{
-		board.toString2();
 		if (move != null) 
 			board.addPiece(move.i, move.j, oppositePlayer);
 		
@@ -31,13 +30,9 @@ public class Joueur extends Othello.Joueur {
 		int i = compute.getI();
 		int j = compute.getJ();
 		
-		System.out.println("----");
-		board.toString2();
 		if(i != Board.DUMMY_VALUE)
 			board.addPiece(i, j, player);
 		
-		System.out.println("----");
-		board.toString2();
 		return (i != Board.DUMMY_VALUE) ? new Move(i, j) : null;
 	}
 

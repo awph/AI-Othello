@@ -62,7 +62,7 @@ public class Board {
 	}
 	
 	//We suppose that we always receive a valid move via the method getAllPossibleMove
-	public void addPiece(int i, int j, int currentPlayer)
+	public void addPiece(int col, int row, int currentPlayer)
 	{
 		++ithMove;
 		if(oldPlayer == currentPlayer)
@@ -70,42 +70,31 @@ public class Board {
 		
 		oldPlayer = currentPlayer;
 		
-		board[i][j] = currentPlayer;
+		board[col][row] = currentPlayer;
 		
-		if(checkHorizontallyLeft2Right(i, j, currentPlayer))
-			actionHorizontallyLeft2Right(i, j, currentPlayer);
+		if(checkHorizontallyLeft2Right(col, row, currentPlayer))
+			actionHorizontallyLeft2Right(col, row, currentPlayer);
 		
-		if(checkHorizontallyRight2Left(i, j, currentPlayer))
-			actionHorizontallyRight2Left(i, j, currentPlayer);
+		if(checkHorizontallyRight2Left(col, row, currentPlayer))
+			actionHorizontallyRight2Left(col, row, currentPlayer);
 		
-		if(checkVerticallyTop2Bottom(i, j, currentPlayer))
-			actionVerticallyTop2Bottom(i, j, currentPlayer);
+		if(checkVerticallyTop2Bottom(col, row, currentPlayer))
+			actionVerticallyTop2Bottom(col, row, currentPlayer);
 		
-		if(checkVerticallyBottom2Top(i, j, currentPlayer))
-			actionVerticallyBottom2Top(i, j, currentPlayer);
+		if(checkVerticallyBottom2Top(col, row, currentPlayer))
+			actionVerticallyBottom2Top(col, row, currentPlayer);
 		
-		if(checkDiagonallyBottomLeft2TopRight(i, j, currentPlayer))
-			actionDiagonallyBottomLeft2TopRight(i, j, currentPlayer);
+		if(checkDiagonallyBottomLeft2TopRight(col, row, currentPlayer))
+			actionDiagonallyBottomLeft2TopRight(col, row, currentPlayer);
 		
-		if(checkDiagonallyBottomRight2TopLeft(i, j, currentPlayer))
-			actionDiagonallyBottomRight2TopLeft(i, j, currentPlayer);
+		if(checkDiagonallyBottomRight2TopLeft(col, row, currentPlayer))
+			actionDiagonallyBottomRight2TopLeft(col, row, currentPlayer);
 		
-		if(checkDiagonallyTopRight2BottomLeft(i, j, currentPlayer))
-			actionDiagonallyTopRight2BottomLeft(i, j, currentPlayer);
+		if(checkDiagonallyTopRight2BottomLeft(col, row, currentPlayer))
+			actionDiagonallyTopRight2BottomLeft(col, row, currentPlayer);
 		
-		if(checkDiagonallyTopLeft2BottomRight(i, j, currentPlayer))
-			actionDiagonallyTopLeft2BottomRight(i, j, currentPlayer);
-	}
-	
-	
-	public void toString2()
-	{
-		for(int ii = 0; ii < BOARD_SIZE; ++ii)
-		{
-			for(int jj = 0; jj < BOARD_SIZE; ++jj)
-				System.out.print(board[jj][ii] + " ");
-			System.out.println();
-		}
+		if(checkDiagonallyTopLeft2BottomRight(col, row, currentPlayer))
+			actionDiagonallyTopLeft2BottomRight(col, row, currentPlayer);
 	}
 	
 	public int getIthMove()
@@ -141,19 +130,19 @@ public class Board {
 		return true;
 	}
 	
-	private boolean isLegit(int i, int j, int currentPlayer)
+	private boolean isLegit(int col, int row, int currentPlayer)
 	{
-		return  checkHorizontallyLeft2Right(i, j, currentPlayer) || 
-				checkHorizontallyRight2Left(i, j, currentPlayer) || 
+		return  checkHorizontallyLeft2Right(col, row, currentPlayer) || 
+				checkHorizontallyRight2Left(col, row, currentPlayer) || 
 				
-				checkVerticallyTop2Bottom(i, j, currentPlayer) || 
-				checkVerticallyBottom2Top(i, j, currentPlayer) ||
+				checkVerticallyTop2Bottom(col, row, currentPlayer) || 
+				checkVerticallyBottom2Top(col, row, currentPlayer) ||
 				
-				checkDiagonallyBottomLeft2TopRight(i, j, currentPlayer) ||
-				checkDiagonallyBottomRight2TopLeft(i, j, currentPlayer) ||
+				checkDiagonallyBottomLeft2TopRight(col, row, currentPlayer) ||
+				checkDiagonallyBottomRight2TopLeft(col, row, currentPlayer) ||
 				
-				checkDiagonallyTopRight2BottomLeft(i, j, currentPlayer) ||
-				checkDiagonallyTopLeft2BottomRight(i, j, currentPlayer);
+				checkDiagonallyTopRight2BottomLeft(col, row, currentPlayer) ||
+				checkDiagonallyTopLeft2BottomRight(col, row, currentPlayer);
 	}
 	
 	/**
@@ -286,13 +275,13 @@ public class Board {
 					int i2 = (-2)*i+1;
 					int j2 = (-2)*j+1;
 
-					// A Part for the 4 corners
+					// C Part for the 4 corners
 					if(board[i1+i2][j1] == currentPlayer)
 						++mine;
 					else if(board[i1+i2][j1] == -currentPlayer)
 						++his;
 					
-					// C Part for the 4 corners
+					// A Part for the 4 corners
 					if(board[i1][j1+j2] == currentPlayer)
 						++mine;
 					else if(board[i1][j1+j2] == -currentPlayer)
@@ -316,15 +305,15 @@ public class Board {
 			for(int j = 2; j <= 5; ++j)	
 			{
 				//Vertical
-				if(board[i][j*(BOARD_SIZE-1)] == currentPlayer)
+				if(board[i*(BOARD_SIZE-1)][j] == currentPlayer)
 					++mine;
-				else if(board[i][j*(BOARD_SIZE-1)] == -currentPlayer);
+				else if(board[i*(BOARD_SIZE-1)][j] == -currentPlayer);
 					++his;
 					
 				//Horizontal
-				if(board[j*(BOARD_SIZE-1)][i] == currentPlayer)
+				if(board[j][i*(BOARD_SIZE-1)] == currentPlayer)
 					++mine;
-				else if(board[j*(BOARD_SIZE-1)][i]  == -currentPlayer);
+				else if(board[j][i*(BOARD_SIZE-1)]  == -currentPlayer);
 					++his;
 			}
 			
@@ -495,65 +484,65 @@ public class Board {
 		return false;
 	}
 	
-	private boolean checkIrreversiblePieceHorizontallyRight(int row, int col, int currentPlayer)
+	private boolean checkIrreversiblePieceHorizontallyRight(int col, int row, int currentPlayer)
 	{
-		for(int j = col + 1; j < BOARD_SIZE; ++j)
-			if(board[row][j] != currentPlayer)
+		for(int i = col + 1; i < BOARD_SIZE; ++i)
+			if(board[i][row] != currentPlayer)
 				return false;
 		return true;
 	}
 	
-	private boolean checkIrreversiblePieceHorizontallyLeft(int row, int col, int currentPlayer)
+	private boolean checkIrreversiblePieceHorizontallyLeft(int col, int row, int currentPlayer)
 	{
-		for(int j = col - 1; j >= 0; --j)
-			if(board[row][j] != currentPlayer)
+		for(int i = col - 1; i >= 0; --i)
+			if(board[i][row] != currentPlayer)
 				return false;
 		return true;
 	}
 	
-	private boolean checkIrreversiblePieceVerticallyBottom(int row, int col, int currentPlayer)
+	private boolean checkIrreversiblePieceVerticallyBottom(int col, int row, int currentPlayer)
 	{
-		for(int i = row + 1; i < BOARD_SIZE; ++i)
-			if(board[i][col] != currentPlayer)
+		for(int j = row + 1; j < BOARD_SIZE; ++j)
+			if(board[col][j] != currentPlayer)
 				return false;
 		return true;
 	}
 	
-	private boolean checkIrreversibleVerticallyTop(int row, int col, int currentPlayer)
+	private boolean checkIrreversibleVerticallyTop(int col, int row, int currentPlayer)
 	{
-		for(int i = row - 1; i >= 0; --i)
-			if(board[i][col] != currentPlayer)
+		for(int j = row - 1; j >= 0; --j)
+			if(board[col][j] != currentPlayer)
 				return false;
 		return true;
 	}
 	
-	private boolean checkIrreversiblePieceDiagonallyBottomRight(int row, int col, int currentPlayer) 
+	private boolean checkIrreversiblePieceDiagonallyBottomRight(int col, int row, int currentPlayer) 
 	{
-		for(int i = row + 1, j = col + 1; i < BOARD_SIZE && j < BOARD_SIZE; ++i, ++j)
+		for(int j = row + 1, i = col + 1; j < BOARD_SIZE && i < BOARD_SIZE; ++j, ++i)
         	if(board[i][j] != currentPlayer)
         		return false;
         return true;
 	}
 	
-	private boolean checkIrreversiblePieceDiagonallyTopLeft(int row, int col, int currentPlayer) 
+	private boolean checkIrreversiblePieceDiagonallyTopLeft(int col, int row, int currentPlayer) 
 	{
-        for(int i = row - 1, j = col - 1; i >= 0 && j >= 0; --i, --j)
+        for(int j = row - 1, i = col - 1; j >= 0 && i >= 0; --j, --i)
         	if(board[i][j] != currentPlayer)
         		return false;
         return true;
 	}
 	
-	private boolean checkIrreversiblePieceDiagonallyBottomLeft(int row, int col, int currentPlayer) 
+	private boolean checkIrreversiblePieceDiagonallyBottomLeft(int col, int row, int currentPlayer) 
 	{
-		for(int i = row + 1, j = col - 1; i < BOARD_SIZE && j >= 0; ++i, --j)
+		for(int j = row + 1, i = col - 1; j < BOARD_SIZE && i >= 0; ++j, --i)
         	if(board[i][j] != currentPlayer)
         		return false;
         return true;
 	}
 	
-	private boolean checkIrreversiblePieceDiagonallyTopRight(int row, int col, int currentPlayer) 
+	private boolean checkIrreversiblePieceDiagonallyTopRight(int col, int row, int currentPlayer) 
 	{
-        for(int i = row - 1, j = col + 1; i >= 0 && j < BOARD_SIZE; --i, ++j)
+        for(int j = row - 1, i = col + 1; j >= 0 && i < BOARD_SIZE; --j, ++i)
         	if(board[i][j] != currentPlayer)
         		return false;
         return true;
