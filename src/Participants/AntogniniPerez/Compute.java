@@ -47,7 +47,7 @@ public class Compute {
 		{
 			for(int i = 0; allPossibleMoves[i] > Board.DUMMY_VALUE; i += 2)
 			{
-				Board newNode = new Board(root);
+				Board newNode = new Board(root); 
 				newNode.addPiece(allPossibleMoves[i], allPossibleMoves[i+1], currentPlayer);
 				
 				double val = alphaBeta(newNode, depth-1, -minOrMax, optVal, -currentPlayer);
@@ -69,7 +69,12 @@ public class Compute {
 	
 	private static double eval(Board root, int currentPlayer,int depth, boolean isEndOfGame) 
 	{
-		//TODO
-		return 0.0;
+		double score = 0.0;
+		
+		score += 1.0 * root.getParityScore(currentPlayer) +
+				 1.0 * root.getMobilityScore(currentPlayer) +
+				 1.0 * root.getPlaceScore(currentPlayer) +
+				 1.0 * root.getStabilityScore(currentPlayer);
+		return score;
 	}
 }

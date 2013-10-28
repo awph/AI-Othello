@@ -1,6 +1,7 @@
 package Participants.AntogniniPerez;
 
 import java.util.Arrays;
+import java.io.*;
 
 public class Board {
 
@@ -14,40 +15,29 @@ public class Board {
 	
 	private static final int BOARD_SIZE = 8;
 	
-	//MUST HAVE THE SIZE OF BOARD_SIZExBOARD_SIZE, http://www.samsoft.org.uk/reversi/diagram7.gif
-	private static final int[][] POSITION_SCORE = 
-		{
-		{99,   -8,    8,    6,    6,    8,   -8,    99},
-		{-8,   -24,   -4,  -3,   -3,   -4,  -24,    -8},    
-		{ 8,     -4,    7,    4,    4,    7,    -4,    8},    
-		{ 6,    -3,    4,    0,    0,    4,   -3,    6},    
-		{ 6,    -3,    4,    0,    0,    4,   -3,    6},    
-		{ 8,     -4,    7,    4,    4,    7,    -4,    8},    
-		{-8,   -24,   -4,  -3,   -3,   -4,  -24,    -8},    
-		{99,   -8,    8,    6,    6,    8,   -8,    99}
-		};
-	
 	private int[][] board;//Col major
+	private int[][] positionMatrixScore;
 	private int oldPlayer;	
 	private boolean hasAPlayerPassed;
 	private int ithMove;
+	private int tempMine;
+	private int tempHis;
 	
 	public Board()
 	{
 		board = new int[BOARD_SIZE][BOARD_SIZE];
-		init();
-	}
-	
-	public Board(Board board)
-	{
-		this();
-		for(int i = 0; i < BOARD_SIZE; ++i)
-			for(int j = 0; j < BOARD_SIZE; ++j)
-				this.board[i][j] = board.board[i][j];
-	}
-	
-	public void init()
-	{
+		positionMatrixScore = new int[][]
+			{
+			{500, -150, 30, 10, 10, 30, -150, 500},
+			{-150, -250, 0, 0, 0, 0, -250, -150},
+			{30, 0, 1, 2, 2, 1, 0, 30},
+			{10, 0, 2, 16, 16, 2, 0, 10},
+			{10, 0, 2, 16, 16, 2, 0, 10},
+			{30, 0, 1, 2, 2, 1, 0, 30},
+			{-150, -250, 0, 0, 0, 0, -250, -150},
+			{500, -150, 30, 10, 10, 30, -150, 500}
+			};
+		
 		for(int i = 0; i < 8; ++i)
 			Arrays.fill(board[i], Empty);
 		
@@ -56,10 +46,29 @@ public class Board {
 		board[BOARD_SIZE/2-1][BOARD_SIZE/2] = Red;
 		board[BOARD_SIZE/2][BOARD_SIZE/2-1] = Red;
 		
+		init();
+	}
+	
+	public Board(Board board)
+	{
+		this.board = new int[BOARD_SIZE][BOARD_SIZE];
+		positionMatrixScore = new int[BOARD_SIZE][BOARD_SIZE];
+		
+		for(int i = 0; i < BOARD_SIZE; ++i)
+		{
+			this.board[i] = Arrays.copyOf(board.board[i], BOARD_SIZE);
+			this.positionMatrixScore[i] = Arrays.copyOf(board.positionMatrixScore[i], BOARD_SIZE);
+		}
+	}
+	
+	public void init()
+	{
 		oldPlayer = Blue;
 		hasAPlayerPassed = false;
 		ithMove = 0;
-	}
+		tempMine = 0;
+		tempHis = 0;
+		}
 	
 	//We suppose that we always receive a valid move via the method getAllPossibleMove
 	public void addPiece(int col, int row, int currentPlayer)
@@ -68,9 +77,9 @@ public class Board {
 		if(oldPlayer == currentPlayer)
 			hasAPlayerPassed = !hasAPlayerPassed;
 		
-		oldPlayer = currentPlayer;
-		
+		oldPlayer = currentPlayer;	
 		board[col][row] = currentPlayer;
+		updateCornerCloseness(col, row);
 		
 		if(checkHorizontallyLeft2Right(col, row, currentPlayer))
 			actionHorizontallyLeft2Right(col, row, currentPlayer);
@@ -143,6 +152,35 @@ public class Board {
 				
 				checkDiagonallyTopRight2BottomLeft(col, row, currentPlayer) ||
 				checkDiagonallyTopLeft2BottomRight(col, row, currentPlayer);
+	}
+	
+	private void updateCornerCloseness(int col, int row)
+	{
+		//We update the corner closeness if the move is a corner
+		if(col == 0 && row == 0)
+		{
+			positionMatrixScore[0][1] *= -1;
+			positionMatrixScore[1][0] *= -1;
+			positionMatrixScore[1][1] *= -1;
+		}
+		else if(col == 0 && row == BOARD_SIZE-1)
+		{
+			positionMatrixScore[0][BOARD_SIZE-2] *= -1;
+			positionMatrixScore[1][BOARD_SIZE-1] *= -1;
+			positionMatrixScore[1][BOARD_SIZE-2] *= -1;
+		}
+		else if(col == BOARD_SIZE-1 && row == 0)
+		{
+			positionMatrixScore[BOARD_SIZE-1][1] *= -1;
+			positionMatrixScore[BOARD_SIZE-2][0] *= -1;
+			positionMatrixScore[BOARD_SIZE-2][1] *= -1;
+		}
+		else if(col == BOARD_SIZE-1 && row == BOARD_SIZE-1)
+		{
+			positionMatrixScore[BOARD_SIZE-1][BOARD_SIZE-2] *= -1;
+			positionMatrixScore[BOARD_SIZE-2][BOARD_SIZE-1] *= -1;
+			positionMatrixScore[BOARD_SIZE-2][BOARD_SIZE-2] *= -1;
+		}
 	}
 	
 	/**
@@ -224,12 +262,92 @@ public class Board {
 	 *========================================================*
 	 */
 	
-	public double getParity(int currentPlayer)
+	public double getParityScore(int currentPlayer)
 	{
 		return (hasAPlayerPassed && currentPlayer == Blue || !hasAPlayerPassed && currentPlayer == Red) ? 1.0 : 0.0;
 	}
 	
-	public double getPieceDifference(int currentPlayer)
+	public double getStabilityScore(int currentPlayer)
+	{
+		getCornerOccupacy(currentPlayer);
+		double mineCorner = tempMine;
+		double hisCorner = tempHis;
+		
+		getCornerCloseness(currentPlayer);
+		double mineCornerCloseness = tempMine;
+		double hisCornerCloseness = tempHis;
+		
+		getBordPiece(currentPlayer);
+		double mineBord = tempMine;
+		double hisBord = tempHis;
+		
+		getNbIrreversiblePiece(currentPlayer);
+		double mineIrreversiblePiece = tempMine - mineCorner;
+		double hisIrreversiblePiece = tempHis - hisCorner;
+		
+		getPieceDifference(currentPlayer);
+		double minePiece = tempMine;
+		double hisPiece = tempHis;
+		
+		if(hisPiece == 0)
+			++hisPiece;
+		if(hisCorner == 0)
+			++hisCorner;
+		if(hisBord == 0)
+			++hisBord;
+		if(hisCornerCloseness == 0)
+			++hisCornerCloseness;
+		if(hisIrreversiblePiece == 0)
+			++hisIrreversiblePiece;
+		
+		double s1 = 3.0 * minePiece/hisPiece;
+		double s2 = 10.0 * mineCorner/hisCorner;
+		double s3 = 10.0 * mineIrreversiblePiece/hisIrreversiblePiece;
+		double s4 = 8.0 * mineBord/hisBord;
+		double s5 = 5.0 * mineCornerCloseness/hisCornerCloseness;
+		
+		double score = s1+s2+s3+s4+s5;
+
+		return  score;
+	}
+	
+	public double getMobilityScore(int currentPlayer)
+	{
+		getMobility(currentPlayer);
+		double mineMobility = tempMine;
+		double hisMobility = tempHis;
+		
+		getFrontierDiscs(currentPlayer);
+		double mineFrontierDiscs = tempMine;
+		double hisFrontierDiscs = tempHis;
+		
+		if(mineFrontierDiscs == 0)
+			++mineFrontierDiscs;
+		if(hisMobility == 0)
+		{
+			++hisMobility;
+			mineMobility *= 3.0;
+		}
+		
+		return 3.0*hisFrontierDiscs/mineFrontierDiscs + 8.0*mineMobility/hisMobility;
+	}
+	
+	public double getPlaceScore(int currentPlayer)
+	{
+		int out = 0;
+		for(int i = 0; i < BOARD_SIZE; ++i)
+			for(int j = 0; j < BOARD_SIZE; ++j)
+				if(board[i][j] != Empty)
+				{
+					if(board[i][j] == currentPlayer)
+						out += positionMatrixScore[i][j];
+					scoreMaxPosition += positionMatrixScore[i][j];
+				}
+		
+		return currentPlayer*out;
+	}
+	
+	private void getPieceDifference(int currentPlayer)
 	{
 		int his = 0, mine = 0;
 		for(int i = 0; i < BOARD_SIZE; ++i)
@@ -239,10 +357,11 @@ public class Board {
 				else if(board[i][j] == -currentPlayer)
 					++his;
 		
-		return mine-his;
+		tempMine = mine;
+		tempHis = his;
 	}
 	
-	public double getCornerOccupacy(int currentPlayer)
+	private void getCornerOccupacy(int currentPlayer)
 	{
 		int mine = 0, his = 0;
 		
@@ -253,10 +372,11 @@ public class Board {
 				else if(board[i*(BOARD_SIZE-1)][j*(BOARD_SIZE-1)] == -currentPlayer)
 					++his;
 		
-		return mine-his;
+		tempMine = mine;
+		tempHis = his;
 	}
 	
-	public double getCornerCloseness(int currentPlayer)
+	private void getCornerCloseness(int currentPlayer)
 	{
 		int mine = 0, his = 0;
 		
@@ -293,10 +413,12 @@ public class Board {
 					else if(board[i1+i2][j1+j2] == -currentPlayer)
 						++his;
 				}
-		return his-mine;
+		
+		tempMine = mine;
+		tempHis = his;
 	}
 	
-	public double getBoardPiece(int currentPlayer)
+	private void getBordPiece(int currentPlayer)
 	{
 		int mine=0;
 		int his = 0;
@@ -317,10 +439,11 @@ public class Board {
 					++his;
 			}
 			
-		return mine-his;
+		tempMine = mine;
+		tempHis = his;
 	}
 	
-	public double getMobilityScore(int currentPlayer)
+	private void getMobility(int currentPlayer)
 	{
 		int[] possibleMove = new int[121];
 		getAllPossibleMove(possibleMove, currentPlayer);
@@ -333,10 +456,11 @@ public class Board {
 		for(i = 0; possibleMove[i] != DUMMY_VALUE;  i += 2);
 		int his = i/2;
 		
-		return mine-his;
+		tempMine = mine;
+		tempHis = his;
 	}
 	
-	public double getFrontierDiscs(int currentPlayer)
+	private void getFrontierDiscs(int currentPlayer)
 	{
 		int mine = 0;
 		int his = 0;
@@ -349,7 +473,8 @@ public class Board {
 					else if(board[i][j] == -currentPlayer)
 						++his;
 		
-		return his-mine;
+		tempMine = mine;
+		tempHis = his;
 	}
 	
 	//Suppose that all the adjency cases exist
@@ -369,25 +494,20 @@ public class Board {
 		return out;
 	}
 	
-	public double getDiscSquares(int currentPlayer)
-	{		
-		double out = 0;
+	private void getNbIrreversiblePiece(int currentPlayer)
+	{
+		int mine = 0, his = 0;
 		for(int i = 0; i < BOARD_SIZE; ++i)
 			for(int j = 0; j < BOARD_SIZE; ++j)
 				if(board[i][j] != Empty)
-					out += POSITION_SCORE[i][j]*board[i][j];
-		
-		return currentPlayer*out;
-	}
-	
-	public double getNbIrreversiblePiece(int currentPlayer)
-	{
-		int out = 0;
-		for(int i = 0; i < BOARD_SIZE; ++i)
-			for(int j = 0; j < BOARD_SIZE; ++j)
-				if(board[i][j] == currentPlayer && isIrreversiblePiece(i, j, currentPlayer))
-					++out;
-		return out;
+				{
+					if(board[i][j] == currentPlayer && isIrreversiblePiece(i, j, currentPlayer))
+						++mine;
+					else if(board[i][j] == -currentPlayer && isIrreversiblePiece(i, j, -currentPlayer))
+						++his;
+				}
+		tempMine = mine;
+		tempHis = his;
 	}
 
 	/*
