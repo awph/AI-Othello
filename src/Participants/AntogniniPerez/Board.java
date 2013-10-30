@@ -1,7 +1,6 @@
 package Participants.AntogniniPerez;
 
 import java.util.Arrays;
-import java.io.*;
 
 public class Board {
 
@@ -17,15 +16,21 @@ public class Board {
 	
 	private int[][] board;//Col major
 	private int[][] positionMatrixScore;
-	private int oldPlayer;	
+	
 	private boolean hasAPlayerPassed;
+	private int oldPlayer;	
 	private int ithMove;
+	
+	//Temp variable to avoid a creation of a pair object
 	private int tempMine;
 	private int tempHis;
 	
 	public Board()
 	{
 		board = new int[BOARD_SIZE][BOARD_SIZE];
+		
+		/*It couldn't be static because it's modified during the game when a player has a corner,
+		we modifiy the corner closeness sign*/
 		positionMatrixScore = new int[][]
 				{
 				{500, -150, 30, 10, 10, 30, -150, 500},
@@ -38,6 +43,17 @@ public class Board {
 				{500, -150, 30, 10, 10, 30, -150, 500}
 				};
 		
+		init();
+	}
+	
+	private void init()
+	{
+		oldPlayer = Blue;
+		hasAPlayerPassed = false;
+		ithMove = 4;
+		tempMine = 0;
+		tempHis = 0;
+		
 		for(int i = 0; i < 8; ++i)
 			Arrays.fill(board[i], Empty);
 		
@@ -45,42 +61,44 @@ public class Board {
 		board[BOARD_SIZE/2][BOARD_SIZE/2] = Blue;
 		board[BOARD_SIZE/2-1][BOARD_SIZE/2] = Red;
 		board[BOARD_SIZE/2][BOARD_SIZE/2-1] = Red;
-		
-		init();
 	}
 	
+	/**
+	 * 
+	 * @param board : Board to copy
+	 */
 	public Board(Board board)
 	{
 		this.board = new int[BOARD_SIZE][BOARD_SIZE];
 		positionMatrixScore = new int[BOARD_SIZE][BOARD_SIZE];
 		ithMove = board.ithMove;
+		
 		for(int i = 0; i < BOARD_SIZE; ++i)
 		{
 			this.board[i] = Arrays.copyOf(board.board[i], BOARD_SIZE);
 			this.positionMatrixScore[i] = Arrays.copyOf(board.positionMatrixScore[i], BOARD_SIZE);
 		}
 	}
-	
-	public void init()
-	{
-		oldPlayer = Blue;
-		hasAPlayerPassed = false;
-		ithMove = 4;
-		tempMine = 0;
-		tempHis = 0;
-		}
-	
-	//We suppose that we always receive a valid move via the method getAllPossibleMove
+
+	/**
+	 * Add a piece in the current game. We suppose that we always receive a valid move via the method getAllPossibleMove
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 */
 	public void addPiece(int col, int row, int currentPlayer)
 	{
 		++ithMove;
+		//Update the parity
 		if(oldPlayer == currentPlayer)
 			hasAPlayerPassed = !hasAPlayerPassed;
 		
 		oldPlayer = currentPlayer;	
 		board[col][row] = currentPlayer;
-		updateCornerCloseness(col, row);
+		updateCornerCloseness(col, row);//Change the cornercloseness if the piece is played in a corner
 		
+		
+		//Return all the pieces linked with the new move
 		if(checkHorizontallyLeft2Right(col, row, currentPlayer))
 			actionHorizontallyLeft2Right(col, row, currentPlayer);
 		
@@ -117,6 +135,11 @@ public class Board {
 	 *========================================================*
 	 */
 	
+	/**
+	 * Return all the possible move for a board
+	 * @param outputArray : Array of size 121, it's unnecessary to have a bigger one. Store all the possible move inside. Even number : col Odd number : row. To know where to stop searching the move, check if the case contains DUMMY_VALUE
+	 * @param currentPlayer The current player via RED or BLUE
+	 */
 	public void getAllPossibleMove(int[] outputArray, int currentPlayer)
 	{
 		int indexOutputArray = 0;
@@ -130,6 +153,10 @@ public class Board {
 		outputArray[indexOutputArray] = DUMMY_VALUE;
 	}
 	
+	/**
+	 * Return if the game is finished
+	 * @return Game is finished
+	 */
 	public boolean isTheGameEnded()
 	{
 		for(int i = 0; i < BOARD_SIZE; ++i)
@@ -139,6 +166,13 @@ public class Board {
 		return true;
 	}
 	
+	/**
+	 * Check if a move is legit
+	 * @param col
+	 * @param row
+	 * @param currentPlayer : Current player with BLUE or RED
+	 * @return if the move is legit
+	 */
 	private boolean isLegit(int col, int row, int currentPlayer)
 	{
 		return  checkHorizontallyLeft2Right(col, row, currentPlayer) || 
@@ -154,9 +188,13 @@ public class Board {
 				checkDiagonallyTopLeft2BottomRight(col, row, currentPlayer);
 	}
 	
+	/**
+	 * Update the corner closeness if the move is in a corner, because it becomes more interesting to have those zone with the corner
+	 * @param col
+	 * @param row
+	 */
 	private void updateCornerCloseness(int col, int row)
 	{
-		//We update the corner closeness if the move is a corner
 		if(col == 0 && row == 0)
 		{
 			positionMatrixScore[0][1] *= -1;
@@ -185,9 +223,10 @@ public class Board {
 	
 	/**
      * A Piece is considered as irreversible if and only if theses 3 sates are
-     * correct: - The left or right side are filled by the same piece color -
-     * The top or bottom side are filled by the same piece color - 2 diagonally
-     * neighbouring size are filled by the same piece color
+     * correct: 
+     * 1) The left or right side are filled by the same piece color 
+     * 2) The top or bottom side are filled by the same piece color 
+     * 3) 2 diagonally neighbouring size are filled by the same piece color
      */
 	private boolean isIrreversiblePiece(int row, int col, int currentPlayer)
 	{
@@ -262,11 +301,21 @@ public class Board {
 	 *========================================================*
 	 */
 	
+	/**
+	 * Score paritiy
+	 * @param currentPlayer
+	 * @return 1.0 if the currentPlayer is the last one, otherwise 0.0
+	 */
 	public double getParityScore(int currentPlayer)
 	{
 		return (hasAPlayerPassed && currentPlayer == Blue || !hasAPlayerPassed && currentPlayer == Red) ? 1.0 : 0.0;
 	}
 	
+	/**
+	 * Score stability
+	 * @param currentPlayer
+	 * @return a stability score for the currentPlayer
+	 */
 	public double getStabilityScore(int currentPlayer)
 	{
 		getCornerOccupacy(currentPlayer);
@@ -289,6 +338,7 @@ public class Board {
 		double minePiece = tempMine;
 		double hisPiece = tempHis;
 		
+		//Avoid division by 0
 		if(hisPiece == 0)
 			++hisPiece;
 		if(hisCorner == 0)
@@ -307,6 +357,11 @@ public class Board {
 				5.0 * mineCornerCloseness/hisCornerCloseness;
 	}
 	
+	/**
+	 * Score Mobility
+	 * @param currentPlayer
+	 * @return a mobility score for current player
+	 */
 	public double getMobilityScore(int currentPlayer)
 	{
 		getMobility(currentPlayer);
@@ -317,6 +372,7 @@ public class Board {
 		double mineFrontierDiscs = tempMine;
 		double hisFrontierDiscs = tempHis;
 		
+		//Avoid division by 0 and change one factor
 		if(mineFrontierDiscs == 0)
 			++mineFrontierDiscs;
 		if(hisMobility == 0)
@@ -328,6 +384,11 @@ public class Board {
 		return 3.0*hisFrontierDiscs/mineFrontierDiscs + 8.0*mineMobility/hisMobility;
 	}
 	
+	/**
+	 * Score position
+	 * @param currentPlayer
+	 * @return a position score for current player
+	 */
 	public double getPlaceScore(int currentPlayer)
 	{
 		int out = 0;
@@ -342,6 +403,11 @@ public class Board {
 		return out;
 	}
 	
+	/**
+	 * Piece difference
+	 * @param currentPlayer
+	 * @return the difference of pieces for the current player. > 0 the current player has more
+	 */
 	public double getPieceDifference(int currentPlayer)
 	{
 		int his = 0, mine = 0;
@@ -358,6 +424,10 @@ public class Board {
 		return mine - his;
 	}
 	
+	/**
+	 * Count the number of corner for both players
+	 * @param currentPlayer
+	 */
 	private void getCornerOccupacy(int currentPlayer)
 	{
 		int mine = 0, his = 0;
@@ -373,6 +443,10 @@ public class Board {
 		tempHis = his;
 	}
 	
+	/**
+	 * Count the corner closeness for both players
+	 * @param currentPlayer
+	 */
 	private void getCornerCloseness(int currentPlayer)
 	{
 		int mine = 0, his = 0;
@@ -415,6 +489,10 @@ public class Board {
 		tempHis = his;
 	}
 	
+	/**
+	 * Count the pieces in the bord for both player
+	 * @param currentPlayer
+	 */
 	private void getBordPiece(int currentPlayer)
 	{
 		int mine=0;
@@ -440,6 +518,10 @@ public class Board {
 		tempHis = his;
 	}
 	
+	/**
+	 * Count the mobility for both player
+	 * @param currentPlayer
+	 */
 	private void getMobility(int currentPlayer)
 	{
 		int[] possibleMove = new int[121];
@@ -457,6 +539,10 @@ public class Board {
 		tempHis = his;
 	}
 	
+	/**
+	 * Count the frontier pieces for both player. A piece is considered as frontier if and only if there is minimum one empty case in the neighborhood 
+	 * @param currentPlayer
+	 */
 	private void getFrontierDiscs(int currentPlayer)
 	{
 		int mine = 0;
@@ -474,14 +560,16 @@ public class Board {
 		tempHis = his;
 	}
 	
-	//Suppose that all the adjency cases exist
-	/*
-	 * XXX
-	 * XOX
-	 * XXX
+	/**
+	 * A piece is considered as frontier if and only if there is minimum one empty case in the neighborhood 
 	 */
 	private boolean isFrontierDisc(int i, int j)
 	{
+		/*
+		 * X X X
+		 * X O X
+	 	 * X X X
+		 */
 		boolean out = false;
 		
 		for(int ii = i-1; !out && ii <= i+1; ++ii)
@@ -491,6 +579,10 @@ public class Board {
 		return out;
 	}
 	
+	/**
+	 * Count the number of irreversible piece for both player
+	 * @param currentPlayer
+	 */
 	private void getNbIrreversiblePiece(int currentPlayer)
 	{
 		int mine = 0, his = 0;
@@ -513,6 +605,13 @@ public class Board {
 	 *========================================================*
 	 */
 
+	/**
+	 * Check if the move is legit from left to right
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkHorizontallyLeft2Right(int col, int row, int currentPlayer)
 	{
 		int oppositePlayer = -currentPlayer;
@@ -524,6 +623,13 @@ public class Board {
 		return false;
 	}
 	
+	/**
+	 * Check if the move is legit from right to left
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkHorizontallyRight2Left(int col, int row, int currentPlayer)
 	{
 		int oppositePlayer = -currentPlayer;
@@ -535,6 +641,13 @@ public class Board {
 		return false;		
 	}
 	
+	/**
+	 * Check if the move is legit from top to bottom
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkVerticallyTop2Bottom(int col, int row, int currentPlayer)
 	{
 		int oppositePlayer = -currentPlayer;
@@ -546,6 +659,13 @@ public class Board {
 		return false;
 	}
 	
+	/**
+	 * Check if the move is legit from bottom to top
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkVerticallyBottom2Top(int col, int row, int currentPlayer)
 	{
 		int oppositePlayer = -currentPlayer;
@@ -557,6 +677,13 @@ public class Board {
 		return false;	
 	}
 	
+	/**
+	 * Check if the move is legit from top left to bottom right
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkDiagonallyTopLeft2BottomRight(int col, int row, int currentPlayer)
 	{
 		int oppositePlayer = -currentPlayer;
@@ -568,6 +695,13 @@ public class Board {
 		return false;
 	}
 	
+	/**
+	 * Check if the move is legit from bottom right to top left
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkDiagonallyBottomRight2TopLeft(int col, int row, int currentPlayer)
 	{
 		int oppositePlayer = -currentPlayer;
@@ -579,6 +713,13 @@ public class Board {
 		return false;
 	}
 	
+	/**
+	 * Check if the move is legit from top right to bottom left
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkDiagonallyTopRight2BottomLeft(int col, int row, int currentPlayer)
 	{
 		int oppositePlayer = -currentPlayer;
@@ -590,6 +731,13 @@ public class Board {
 		return false;
 	}
 	
+	/**
+	 * Check if the move is legit from bottom left to top right
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkDiagonallyBottomLeft2TopRight(int col, int row, int currentPlayer)
 	{
 		int oppositePlayer = -currentPlayer;
@@ -601,6 +749,13 @@ public class Board {
 		return false;
 	}
 	
+	/**
+	 * Check if the piece is irreversible from left to right
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkIrreversiblePieceHorizontallyRight(int col, int row, int currentPlayer)
 	{
 		for(int i = col + 1; i < BOARD_SIZE; ++i)
@@ -609,6 +764,13 @@ public class Board {
 		return true;
 	}
 	
+	/**
+	 * Check if the piece is irreversible from right to left
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkIrreversiblePieceHorizontallyLeft(int col, int row, int currentPlayer)
 	{
 		for(int i = col - 1; i >= 0; --i)
@@ -617,6 +779,13 @@ public class Board {
 		return true;
 	}
 	
+	/**
+	 * Check if the piece is irreversible from top to bottom
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkIrreversiblePieceVerticallyBottom(int col, int row, int currentPlayer)
 	{
 		for(int j = row + 1; j < BOARD_SIZE; ++j)
@@ -625,6 +794,13 @@ public class Board {
 		return true;
 	}
 	
+	/**
+	 * Check if the piece is irreversible from bottom to top
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkIrreversibleVerticallyTop(int col, int row, int currentPlayer)
 	{
 		for(int j = row - 1; j >= 0; --j)
@@ -633,6 +809,13 @@ public class Board {
 		return true;
 	}
 	
+	/**
+	 * Check if the piece is irreversible from top left to bottom right
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkIrreversiblePieceDiagonallyBottomRight(int col, int row, int currentPlayer) 
 	{
 		for(int j = row + 1, i = col + 1; j < BOARD_SIZE && i < BOARD_SIZE; ++j, ++i)
@@ -641,6 +824,13 @@ public class Board {
         return true;
 	}
 	
+	/**
+	 * Check if the piece is irreversible from bottom right to top left
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkIrreversiblePieceDiagonallyTopLeft(int col, int row, int currentPlayer) 
 	{
         for(int j = row - 1, i = col - 1; j >= 0 && i >= 0; --j, --i)
@@ -649,6 +839,13 @@ public class Board {
         return true;
 	}
 	
+	/**
+	 * Check if the piece is irreversible from top right to bottom left
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkIrreversiblePieceDiagonallyBottomLeft(int col, int row, int currentPlayer) 
 	{
 		for(int j = row + 1, i = col - 1; j < BOARD_SIZE && i >= 0; ++j, --i)
@@ -657,6 +854,13 @@ public class Board {
         return true;
 	}
 	
+	/**
+	 * Check if the piece is irreversible from bottom left to top right
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 * @return
+	 */
 	private boolean checkIrreversiblePieceDiagonallyTopRight(int col, int row, int currentPlayer) 
 	{
         for(int j = row - 1, i = col + 1; j >= 0 && i < BOARD_SIZE; --j, ++i)
@@ -671,48 +875,96 @@ public class Board {
 	 *========================================================*
 	 */
 	
+	/**
+	 * Return the necessary pieces from left to right
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 */
 	private void actionHorizontallyLeft2Right(int col, int row, int currentPlayer)
 	{
 		for(int i = col + 1; i < BOARD_SIZE && board[i][row] == -currentPlayer; ++i)
 			board[i][row] = currentPlayer;
 	}
 	
+	/**
+	 * Return the necessary pieces from right to left
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 */
 	private void actionHorizontallyRight2Left(int col, int row, int currentPlayer)
 	{
 		for(int i = col - 1; i >= 0 && board[i][row] == -currentPlayer; --i)
 			board[i][row] = currentPlayer;
 	}
 	
+	/**
+	 * Return the necessary pieces from top to bottom
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 */
 	private void actionVerticallyTop2Bottom(int col, int row, int currentPlayer)
 	{
 		for(int j = row + 1; j < BOARD_SIZE && board[col][j] == -currentPlayer; ++j)
 			board[col][j] = currentPlayer;
 	}
 	
+	/**
+	 * Return the necessary pieces from bottom to topt
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 */
 	private void actionVerticallyBottom2Top(int col, int row, int currentPlayer)
 	{
 		for(int j = row - 1; j >= 0 && board[col][j] == -currentPlayer; --j)
 			board[col][j] = currentPlayer;
 	}
 	
+	/**
+	 * Return the necessary pieces from top left to bottom right
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 */
 	private void actionDiagonallyTopLeft2BottomRight(int col, int row, int currentPlayer)
 	{
 		for(int j = row + 1, i = col + 1; j < BOARD_SIZE && i < BOARD_SIZE && board[i][j] == -currentPlayer; ++j, ++i)
 			board[i][j] = currentPlayer;	
 	}
 	
+	/**
+	 * Return the necessary pieces from bottom right to top left
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 */
 	private void actionDiagonallyBottomRight2TopLeft(int col, int row, int currentPlayer)
 	{
 		for(int j = row - 1, i = col - 1; j >= 0 && i >= 0 && board[i][j] == -currentPlayer; --j, --i)
 			board[i][j] = currentPlayer;
 	}
 	
+	/**
+	 * Return the necessary pieces from top right to bottom left
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 */
 	private void actionDiagonallyTopRight2BottomLeft(int col, int row, int currentPlayer)
 	{
 		for(int j = row + 1, i = col - 1; j < BOARD_SIZE && i >= 0 && board[i][j] == -currentPlayer; ++j, --i)
 			board[i][j] = currentPlayer;
 	}
 	
+	/**
+	 * Return the necessary pieces from bottom left to top right
+	 * @param col
+	 * @param row
+	 * @param currentPlayer
+	 */
 	private void actionDiagonallyBottomLeft2TopRight(int col, int row, int currentPlayer)
 	{
 		for(int j = row - 1, i = col + 1; j >= 0 && i < BOARD_SIZE && board[i][j] == -currentPlayer; --j, ++i)

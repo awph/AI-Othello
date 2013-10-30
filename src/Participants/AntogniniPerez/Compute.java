@@ -91,7 +91,7 @@ public class Compute {
 		}
 		else
 		{
-			double ratio = ithMove / 60;
+			double ratio = ithMove / 64;
 
 			score += 3* 5 * scoreParity * (1 - ratio) +
 					 1 * 2 * scoreMobility *  (1 - ratio) +
