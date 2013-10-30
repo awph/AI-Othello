@@ -13,6 +13,7 @@ public class Board {
 	public static final int DUMMY_VALUE = -1;
 	
 	private static final int BOARD_SIZE = 8;
+	public static final int END_BEGIN_GAME = 13;
 	
 	private int[][] board;//Col major
 	private int[][] positionMatrixScore;

@@ -13,24 +13,24 @@ public class Compute {
 	
 	private static final int[][] factors = 
 		{
-		{7,1,9,3}, // P1, level 1
-		{3,5,5,6}, // P1, level 2
+		{3,1,8,3}, // P1, level 1
+		{4,1,6,6}, // P1, level 2
 		{3,1,3,8}, // P1, level 3
-		{10,1,8,10}, // P1, level 4
-		{3,1,3,1}, // P1, level 5
-		{6,4,3,6}, // P1, level 6
+		{5,1,8,10}, // P1, level 4
+		{9,1,3,6}, // P1, level 5
+		{8,7,5,6}, // P1, level 6
 		{8,3,6,9}, // P1, level 7
 		{9,10,6,4}, // P1, level 8
-		{9,10,6,4}, // P1, level 9
-		{1,1,1,1}, // P2, level 1
-		{1,1,1,1}, // P2, level 2
-		{1,1,1,1}, // P2, level 3
-		{1,1,1,1}, // P2, level 4
-		{1,1,1,1}, // P2, level 5
-		{1,1,1,1}, // P2, level 6
-		{1,1,1,1}, // P2, level 7
-		{1,1,1,1}, // P2, level 8
-		{1,1,1,1}, // P2, level 9
+		{9,10,7,3}, // P1, level 9
+		{6,1,2,8}, // P2, level 1
+		{3,2,2,9}, // P2, level 2
+		{6,5,6,9}, // P2, level 3
+		{3,9,9,3}, // P2, level 4
+		{10,10,1,1}, // P2, level 5
+		{2,7,4,5}, // P2, level 6
+		{9,8,1,7}, // P2, level 7
+		{9,10,6,4}, // P2, level 8
+		{9,10,7,3}, // P2, level 9
 		};
 	
 	private int I;
@@ -101,6 +101,7 @@ public class Compute {
 	
 	private double eval(Board root, int currentPlayer,int depth, boolean isEndOfGame, boolean hasToPass) 
 	{
+		if(isEndOfGame) return (root.getPieceDifference(currentPlayer) > 0) ? Integer.MAX_VALUE : Integer.MIN_VALUE;
 		double score = 0.0;
 		double scoreParity = root.getParityScore(currentPlayer);
 		double scoreMobility = root.getMobilityScore(currentPlayer);
@@ -108,9 +109,7 @@ public class Compute {
 		double scoreStability = root.getStabilityScore(currentPlayer);
 		int ithMove = root.getIthMove();
 		
-		if(isEndOfGame)
-			score = (root.getPieceDifference(currentPlayer) > 0) ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-		else if(ithMove < 13)
+		if(ithMove < Board.END_BEGIN_GAME)
 		{
 			score += f1 * 5 * scoreParity +
 					 f2 * 3 * scoreMobility +
@@ -136,9 +135,9 @@ public class Compute {
 	private void chooseFactors()
 	{
 		int index = -1 + depth + ((player > 0 ) ? 9 : 0);
-		f1 =  this.factors[index][0];
-		f2 =  this.factors[index][1];
-		f3 =  this.factors[index][2];
-		f4 =  this.factors[index][3];
+		f1 =  Compute.factors[index][0];
+		f2 =  Compute.factors[index][1];
+		f3 =  Compute.factors[index][2];
+		f4 =  Compute.factors[index][3];
 	}
 }
