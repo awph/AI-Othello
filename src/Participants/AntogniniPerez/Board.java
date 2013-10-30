@@ -53,7 +53,7 @@ public class Board {
 	{
 		this.board = new int[BOARD_SIZE][BOARD_SIZE];
 		positionMatrixScore = new int[BOARD_SIZE][BOARD_SIZE];
-		
+		ithMove = board.ithMove;
 		for(int i = 0; i < BOARD_SIZE; ++i)
 		{
 			this.board[i] = Arrays.copyOf(board.board[i], BOARD_SIZE);
@@ -65,7 +65,7 @@ public class Board {
 	{
 		oldPlayer = Blue;
 		hasAPlayerPassed = false;
-		ithMove = 0;
+		ithMove = 4;
 		tempMine = 0;
 		tempHis = 0;
 		}
@@ -108,10 +108,6 @@ public class Board {
 	
 	public int getIthMove()
 	{
-		int ithMove = 0;
-		for(int i = 0; i < BOARD_SIZE; ++i)
-			for(int j = 0; j < BOARD_SIZE; ++j)
-				if(board[i][j] != Empty) ithMove++;
 		return ithMove;
 	}
 	
@@ -303,16 +299,12 @@ public class Board {
 			++hisCornerCloseness;
 		if(hisIrreversiblePiece == 0)
 			++hisIrreversiblePiece;
-		
-		double s1 = 3.0 * minePiece/hisPiece;
-		double s2 = 10.0 * mineCorner/hisCorner;
-		double s3 = 10.0 * mineIrreversiblePiece/hisIrreversiblePiece;
-		double s4 = 8.0 * mineBord/hisBord;
-		double s5 = 5.0 * mineCornerCloseness/hisCornerCloseness;
-		
-		double score = s1+s2+s3+s4+s5;
 
-		return  score;
+		return  3.0 * minePiece/hisPiece +
+				10.0 * mineCorner/hisCorner +
+				10.0 * mineIrreversiblePiece/hisIrreversiblePiece +
+				8.0 * mineBord/hisBord +
+				5.0 * mineCornerCloseness/hisCornerCloseness;
 	}
 	
 	public double getMobilityScore(int currentPlayer)
@@ -350,7 +342,7 @@ public class Board {
 		return out;
 	}
 	
-	public void getPieceDifference(int currentPlayer)
+	public double getPieceDifference(int currentPlayer)
 	{
 		int his = 0, mine = 0;
 		for(int i = 0; i < BOARD_SIZE; ++i)
@@ -362,6 +354,8 @@ public class Board {
 		
 		tempMine = mine;
 		tempHis = his;
+		
+		return mine - his;
 	}
 	
 	private void getCornerOccupacy(int currentPlayer)
@@ -512,14 +506,6 @@ public class Board {
 		tempMine = mine;
 		tempHis = his;
 	}
-	
-	public int getTempMine() {
-		return tempMine;
-	}
-
-	public int getTempHis() {
-		return tempHis;
-	}	
 
 	/*
 	 *========================================================*

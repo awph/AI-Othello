@@ -16,7 +16,7 @@ public class Joueur extends Othello.Joueur {
 		player = playerID == 1 ? Board.Blue : Board.Red;
 		oppositePlayer = -player;
 		board = new Board();
-		compute = new Compute();
+		compute = new Compute(player, depth);
 	}
 
 	public Move nextPlay(Move move) 
@@ -25,7 +25,7 @@ public class Joueur extends Othello.Joueur {
 			board.addPiece(move.i, move.j, oppositePlayer);
 		
 		compute.initialize();
-		compute.alphaBeta(board, depth, 1, Compute.INF, player);
+		compute.alphaBeta(board, depth, 1, Compute.INF, player, false);
 		
 		int i = compute.getI();
 		int j = compute.getJ();
