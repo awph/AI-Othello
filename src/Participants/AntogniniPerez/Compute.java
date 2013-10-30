@@ -2,7 +2,7 @@ package Participants.AntogniniPerez;
 
 public class Compute {
 
-	public static final double INF = Integer.MAX_VALUE;
+	public static final double INF = Double.MAX_VALUE;
 	
 	private int I;
 	private int J;
@@ -70,11 +70,43 @@ public class Compute {
 	private static double eval(Board root, int currentPlayer,int depth, boolean isEndOfGame) 
 	{
 		double score = 0.0;
+		currentPlayer = -1;
+		double scoreParity = root.getParityScore(currentPlayer);
+		double scoreMobility = root.getMobilityScore(currentPlayer);
+		double scorePlace = root.getPlaceScore(currentPlayer);
+		double scoreStability = root.getStabilityScore(currentPlayer);
+		int ithMove = root.getIthMove();
 		
-		score += 1.0 * root.getParityScore(currentPlayer) +
-				 1.0 * root.getMobilityScore(currentPlayer) +
-				 1.0 * root.getPlaceScore(currentPlayer) +
-				 1.0 * root.getStabilityScore(currentPlayer);
+		if(root.isTheGameEnded())
+		{
+			root.getPieceDifference(currentPlayer);
+			int scorePiece = root.getTempMine() - root.getTempHis();
+		
+			score = (scorePiece > 0) ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+		}
+		else if(ithMove < 13)
+		{
+			score += 15 * scoreParity +
+					 3 * scoreMobility +
+					 3 * (scorePlace / 10) +
+					 scoreStability;
+		}
+		else
+		{
+			double ratio = ithMove / 64;
+
+			score += 15 * scoreParity * (1 - ratio) +
+					 2 * scoreMobility *  (1 - ratio) +
+					 3 * (scorePlace / 10) * (1 - ratio)+
+					 scoreStability * ratio;
+		}		
+
+		int[] allPossibleMoves = new int[121];
+		root.getAllPossibleMove(allPossibleMoves, currentPlayer);
+
+		if(allPossibleMoves[0] == Board.DUMMY_VALUE)
+			score -= 500;
+		
 		return score;
 	}
 }

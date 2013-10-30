@@ -27,16 +27,16 @@ public class Board {
 	{
 		board = new int[BOARD_SIZE][BOARD_SIZE];
 		positionMatrixScore = new int[][]
-			{
-			{500, -150, 30, 10, 10, 30, -150, 500},
-			{-150, -250, 0, 0, 0, 0, -250, -150},
-			{30, 0, 1, 2, 2, 1, 0, 30},
-			{10, 0, 2, 16, 16, 2, 0, 10},
-			{10, 0, 2, 16, 16, 2, 0, 10},
-			{30, 0, 1, 2, 2, 1, 0, 30},
-			{-150, -250, 0, 0, 0, 0, -250, -150},
-			{500, -150, 30, 10, 10, 30, -150, 500}
-			};
+				{
+				{500, -150, 30, 10, 10, 30, -150, 500},
+				{-150, -250, 0, 0, 0, 0, -250, -150},
+				{30, 0, 1, 2, 2, 1, 0, 30},
+				{10, 0, 2, 16, 16, 2, 0, 10},
+				{10, 0, 2, 16, 16, 2, 0, 10},
+				{30, 0, 1, 2, 2, 1, 0, 30},
+				{-150, -250, 0, 0, 0, 0, -250, -150},
+				{500, -150, 30, 10, 10, 30, -150, 500}
+				};
 		
 		for(int i = 0; i < 8; ++i)
 			Arrays.fill(board[i], Empty);
@@ -108,6 +108,10 @@ public class Board {
 	
 	public int getIthMove()
 	{
+		int ithMove = 0;
+		for(int i = 0; i < BOARD_SIZE; ++i)
+			for(int j = 0; j < BOARD_SIZE; ++j)
+				if(board[i][j] != Empty) ithMove++;
 		return ithMove;
 	}
 	
@@ -341,13 +345,12 @@ public class Board {
 				{
 					if(board[i][j] == currentPlayer)
 						out += positionMatrixScore[i][j];
-					scoreMaxPosition += positionMatrixScore[i][j];
 				}
 		
-		return currentPlayer*out;
+		return out;
 	}
 	
-	private void getPieceDifference(int currentPlayer)
+	public void getPieceDifference(int currentPlayer)
 	{
 		int his = 0, mine = 0;
 		for(int i = 0; i < BOARD_SIZE; ++i)
@@ -509,13 +512,21 @@ public class Board {
 		tempMine = mine;
 		tempHis = his;
 	}
+	
+	public int getTempMine() {
+		return tempMine;
+	}
+
+	public int getTempHis() {
+		return tempHis;
+	}	
 
 	/*
 	 *========================================================*
 	 *						CHECK PART
 	 *========================================================*
 	 */
-	
+
 	private boolean checkHorizontallyLeft2Right(int col, int row, int currentPlayer)
 	{
 		int oppositePlayer = -currentPlayer;
