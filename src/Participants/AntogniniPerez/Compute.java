@@ -5,6 +5,33 @@ public class Compute {
 	public static final double INF = Double.MAX_VALUE;
 	private int player;
 	private int depth;
+
+	private int f1;
+	private int f2;
+	private int f3;
+	private int f4;
+	
+	private static final int[][] factors = 
+		{
+		{7,1,9,3}, // P1, level 1
+		{3,5,5,6}, // P1, level 2
+		{3,1,3,8}, // P1, level 3
+		{10,1,8,10}, // P1, level 4
+		{3,1,3,1}, // P1, level 5
+		{6,4,3,6}, // P1, level 6
+		{8,3,6,9}, // P1, level 7
+		{9,10,6,4}, // P1, level 8
+		{9,10,6,4}, // P1, level 9
+		{1,1,1,1}, // P2, level 1
+		{1,1,1,1}, // P2, level 2
+		{1,1,1,1}, // P2, level 3
+		{1,1,1,1}, // P2, level 4
+		{1,1,1,1}, // P2, level 5
+		{1,1,1,1}, // P2, level 6
+		{1,1,1,1}, // P2, level 7
+		{1,1,1,1}, // P2, level 8
+		{1,1,1,1}, // P2, level 9
+		};
 	
 	private int I;
 	private int J;
@@ -14,6 +41,7 @@ public class Compute {
 		this.player = player;
 		this.depth = depth;
 		initialize();
+		chooseFactors();
 	}
 	
 	public void initialize()
@@ -71,7 +99,7 @@ public class Compute {
 		return optVal;
 	}
 	
-	private static double eval(Board root, int currentPlayer,int depth, boolean isEndOfGame, boolean hasToPass) 
+	private double eval(Board root, int currentPlayer,int depth, boolean isEndOfGame, boolean hasToPass) 
 	{
 		double score = 0.0;
 		double scoreParity = root.getParityScore(currentPlayer);
@@ -84,24 +112,33 @@ public class Compute {
 			score = (root.getPieceDifference(currentPlayer) > 0) ? Integer.MAX_VALUE : Integer.MIN_VALUE;
 		else if(ithMove < 13)
 		{
-			score += 3 * 5 * scoreParity +
-					 1 * 3 * scoreMobility +
-					 3 * (scorePlace / 10) +
-					 1 *scoreStability;
+			score += f1 * 5 * scoreParity +
+					 f2 * 3 * scoreMobility +
+					 f3 * (scorePlace / 10) +
+					 f4 *scoreStability;
 		}
 		else
 		{
-			double ratio = ithMove / 60;
+			double ratio = ithMove / 64;
 
-			score += 3* 5 * scoreParity * (1 - ratio) +
-					 1 * 2 * scoreMobility *  (1 - ratio) +
-					 3 * (scorePlace / 10) * (1 - ratio)+
-					 1 * scoreStability * ratio;
+			score += f1 * 5 * scoreParity * (1 - ratio) +
+					 f2 * 2 * scoreMobility *  (1 - ratio) +
+					 f3 * (scorePlace / 10) * (1 - ratio)+
+					 f4 * scoreStability * ratio;
 		}		
 		
 		if(hasToPass)
 			score -= 500;
 		
 		return score;
+	}
+	
+	private void chooseFactors()
+	{
+		int index = -1 + depth + ((player > 0 ) ? 9 : 0);
+		f1 =  this.factors[index][0];
+		f2 =  this.factors[index][1];
+		f3 =  this.factors[index][2];
+		f4 =  this.factors[index][3];
 	}
 }
