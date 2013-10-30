@@ -59,13 +59,21 @@ public class Compute {
 		return J;
 	}
 	
-	//Maximize -> minOrMax = 1, otherwhise -1 (minimize)
-	//Return score
+	/**
+	 * Apply the algorithm alpha-beta
+	 * @param root : Current board
+	 * @param depth : Depth
+	 * @param minOrMax : If we have to maximize (1) or minimize (-1)
+	 * @param parentValue : the alpha or beta of the parent
+	 * @param currentPlayer : currentPlayer
+	 * @param hasToPass : If the player MUST pass
+	 * @return score and you can get the move with getI & getJ
+	 */
 	public double alphaBeta(Board root, int depth, int minOrMax, double parentValue, int currentPlayer, boolean hasToPass)
 	{
 		boolean isEndOfGame = root.isTheGameEnded();
 		if(depth == 0 || isEndOfGame)
-			return eval(root, this.player, this.depth, isEndOfGame, hasToPass);
+			return eval(root, isEndOfGame, hasToPass);
 		
 		double optVal = minOrMax * -INF;
 		int optOpi = Board.DUMMY_VALUE, optOpj = Board.DUMMY_VALUE;
@@ -99,14 +107,21 @@ public class Compute {
 		return optVal;
 	}
 	
-	private double eval(Board root, int currentPlayer,int depth, boolean isEndOfGame, boolean hasToPass) 
+	/**
+	 * Compute a score for the current game
+	 * @param root : Current board
+	 * @param isEndOfGame : If the game is finished
+	 * @param hasToPass : If the played has to pass
+	 * @return A score
+	 */
+	private double eval(Board root, boolean isEndOfGame, boolean hasToPass) 
 	{
-		if(isEndOfGame) return (root.getPieceDifference(currentPlayer) > 0) ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+		if(isEndOfGame) return (root.getPieceDifference(player) > 0) ? Integer.MAX_VALUE : Integer.MIN_VALUE;
 		double score = 0.0;
-		double scoreParity = root.getParityScore(currentPlayer);
-		double scoreMobility = root.getMobilityScore(currentPlayer);
-		double scorePlace = root.getPlaceScore(currentPlayer);
-		double scoreStability = root.getStabilityScore(currentPlayer);
+		double scoreParity = root.getParityScore(player);
+		double scoreMobility = root.getMobilityScore(player);
+		double scorePlace = root.getPlaceScore(player);
+		double scoreStability = root.getStabilityScore(player);
 		int ithMove = root.getIthMove();
 		
 		if(ithMove < Board.END_BEGIN_GAME)
