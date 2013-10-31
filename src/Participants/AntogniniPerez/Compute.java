@@ -6,19 +6,19 @@ public class Compute {
 	private int player;
 	private int depth;
 
-	private int f1;
-	private int f2;
-	private int f3;
-	private int f4;
+	private double f1;
+	private double f2;
+	private double f3;
+	private double f4;
 	
-	private static final int[][] factors = 
+	private static final double[][] factors = 
 		{
 		{3,1,8,3}, // P1, level 1
 		{4,1,6,6}, // P1, level 2
 		{3,1,3,8}, // P1, level 3
 		{5,1,8,10}, // P1, level 4
-		{9,1,3,6}, // P1, level 5
-		{8,7,5,6}, // P1, level 6
+		{4,17,49,30}, // P1, level 5
+		{4,26,20,6}, // P1, level 6
 		{8,3,6,9}, // P1, level 7
 		{9,10,6,4}, // P1, level 8
 		{9,10,7,3}, // P1, level 9
@@ -26,8 +26,8 @@ public class Compute {
 		{3,2,2,9}, // P2, level 2
 		{6,5,6,9}, // P2, level 3
 		{3,9,9,3}, // P2, level 4
-		{10,10,1,1}, // P2, level 5
-		{2,7,4,5}, // P2, level 6
+		{1.0/5.0,31,10,8}, // P2, level 5
+		{3.0/5.0,38,20,50}, // P2, level 6
 		{9,8,1,7}, // P2, level 7
 		{9,10,6,4}, // P2, level 8
 		{9,10,7,3}, // P2, level 9
