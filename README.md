@@ -9,6 +9,12 @@ Dans la classe Board, nous minimisons le parcours du tableau 2D représentant le
 
 Afin d'optimiser encore plus notre système, nous avons évité d'utiliser des objets, donc dans la fonction getAllPossibleMove, à la place d'instancier un ensemble de Move, nous utilisons un tableau d'entier dans lequel un coup est représenté par 2 indices (paire = colonne, impaire = ligne). 
 
+Une autre information importante est le fait que nous gérerons très bien le cas d'othellier NxN, N>=4, il suffit de changer la constante BOARD_SIZE.
+
+# Amélioration alpha-beta
+
+L'apha-beta implémenté fonctionne parfaitement, mais il y aurait moyen de l'améliorer. Par exemple, il se peut qu'on ait déjà calculé le score de l'évaluation d'un état, il serait intéressant de stocker ce résultat dans une table de hashage, avec une fonction qu'on définirait qu'à partir d'un état de jeu (position sur le plateau) ainsi que la profondeur, qu'on puisse voir si le résultat a déjà été calculé, afin de gagner du temps.
+
 # Fonction d'évaluation #
 
 Pour commencer, nous avons représenté 4 groupes de scores différents :
