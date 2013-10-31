@@ -3,7 +3,7 @@ AI-Othello
 
 # Idée générale #
 
-D'une manière générale, on a réduit au strict minimum le nombre d'instanciation d'objet. Dans alpha-beta, nous avons préféré utilisé des attributs ainsi que des getters pour que la classe Joueur puisse récupérer les coordonnées du coup à jouer.
+D'une manière générale, on a réduit au strict minimum le nombre d'instanciation d'objet. Dans alpha-beta, nous avons préféré utilisé des attributs ainsi que des getters pour que la classe Joueur puisse récupérer les coordonnées du coup à jouer. Le même principe a été utilisé dans la plus part des fonctions scores, pour éviter de retourner des tuples.
 
 Dans la classe Board, nous minimisons le parcours du tableau 2D représentant le jeu : à chaque vérification d'un coup, nous partons du coup joué et vérifions les conditions pour que le coup soit valide (gauche, droite, haut, bas, ...). Une fois le coup joué, nous utilisons le même principe pour retourner les pièces.
 
@@ -13,7 +13,7 @@ Une autre information importante est le fait que nous gérerons très bien le ca
 
 # Amélioration alpha-beta
 
-L'apha-beta implémenté fonctionne parfaitement, mais il y aurait moyen de l'améliorer. Par exemple, il se peut qu'on ait déjà calculé le score de l'évaluation d'un état, il serait intéressant de stocker ce résultat dans une table de hashage, avec une fonction qu'on définirait qu'à partir d'un état de jeu (position sur le plateau) ainsi que la profondeur, qu'on puisse voir si le résultat a déjà été calculé, afin de gagner du temps.
+L'apha-beta implémenté fonctionne parfaitement, mais il y aurait moyen de l'améliorer. Par exemple, il se peut qu'on ait déjà calculé le score de l'évaluation d'un état. Il serait intéressant de stocker ce résultat dans une table de hashage avec une fonction qu'on définirait à partir d'un état de jeu (position des pions sur le plateau) ainsi que la profondeur, afin qu'on puisse voir si le résultat a déjà été calculé, afin de gagner du temps.
 
 # Fonction d'évaluation #
 
