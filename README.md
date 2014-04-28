@@ -55,3 +55,7 @@ Pour la suite, nous réduisons au fur et à mesure de la partie, l'importance de
 Quelques exceptions sont présentes
  - Dans le cas où l'on ne peut pas joueur de pièce, nous pénalisons grandement le score;
  - Dans le cas où la partie est finie, on retourne une valeur correspondante si l'on a gagné la partie ou pas.
+
+## License
+
+This code is distributed under the terms and conditions of the [MIT license](LICENSE).
